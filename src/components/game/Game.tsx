@@ -4,7 +4,7 @@ import * as React from "react";
 import * as THREE from "three";
 import { ControlsGuide } from "./ControlsGuide";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops, createUTurnMarkings } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
@@ -142,9 +142,14 @@ export default function Game() {
 
       // Obstacle logic
       obstacles.forEach((obstacle, i) => {
-        if (obstacle.name === 'car' || obstacle.name === 'bike') {
-            obstacle.position.z += delta * (obstacle.name === 'car' ? 20 : 30);
-            if (obstacle.position.z > 20) obstacle.position.z = -490;
+        if (obstacle.userData.type === 'car' || obstacle.userData.type === 'bike' || obstacle.userData.type === 'truck') {
+            obstacle.position.z += delta * obstacle.userData.speed;
+            if (obstacle.position.z > 20) {
+              obstacle.position.z = -490;
+              // Vary speed and lane on reset
+              obstacle.userData.speed = 15 + Math.random() * 20;
+              obstacle.position.x = (Math.random() > 0.5 ? 1 : -1) * (obstacle.userData.type === 'bike' ? 10 : 6);
+            }
         }
         
         obstacleBoxes[i].setFromObject(obstacle);
@@ -245,3 +250,5 @@ export default function Game() {
       <div ref={mountRef} className="h-full w-full" />
     </div>
   );
+}
+    

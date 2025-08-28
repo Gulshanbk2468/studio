@@ -10,91 +10,94 @@ export function createBus(): THREE.Group {
   const grey = new THREE.MeshLambertMaterial({ color: 0x808080 });
   const glass = new THREE.MeshLambertMaterial({ color: 0x222222, transparent: true, opacity: 0.5 });
   const light = new THREE.MeshLambertMaterial({ color: 0xFFFF00 });
+  const red = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
 
   // Main body
-  const bodyGeo = new THREE.BoxGeometry(2.8, 1.8, 8);
+  const bodyGeo = new THREE.BoxGeometry(2.8, 2.2, 9);
   const body = new THREE.Mesh(bodyGeo, busYellow);
-  body.position.y = 1;
+  body.position.y = 1.1;
   bus.add(body);
   
-  // Front cabin
-  const cabinGeo = new THREE.BoxGeometry(2.8, 1.8, 1.5);
-  const cabin = new THREE.Mesh(cabinGeo, busYellow);
-  cabin.position.set(0, 1, 4.75);
-  // Taper the front
-  const pos = cabin.geometry.attributes.position;
-  for (let i = 0; i < pos.count; i++) {
-    const z = pos.getZ(i);
-    if (z > 0) {
-      pos.setY(i, pos.getY(i) + 0.3 * (z/0.75));
-    }
-  }
-  pos.needsUpdate = true;
-  bus.add(cabin);
+  // Front cabin shape
+  const frontGeo = new THREE.BoxGeometry(2.8, 1.5, 1);
+  const front = new THREE.Mesh(frontGeo, busYellow);
+  front.position.set(0, 0.75, 5);
+  bus.add(front);
 
   // Roof
-  const roofGeo = new THREE.BoxGeometry(2.6, 0.2, 8.5);
+  const roofGeo = new THREE.BoxGeometry(2.7, 0.2, 10);
   const roof = new THREE.Mesh(roofGeo, busYellow);
-  roof.position.y = 2.1;
+  roof.position.y = 2.3;
   bus.add(roof);
 
   // Bumper
-  const bumperGeo = new THREE.BoxGeometry(2.8, 0.4, 0.5);
-  const bumper = new THREE.Mesh(bumperGeo, grey);
-  bumper.position.set(0, -0.2, 4.5);
+  const bumperGeo = new THREE.BoxGeometry(2.9, 0.3, 0.5);
+  const bumper = new THREE.Mesh(bumperGeo, black);
+  bumper.position.set(0, 0.15, 4.7);
   bus.add(bumper);
 
   // Grille
   const grilleGeo = new THREE.PlaneGeometry(2, 0.5);
   const grille = new THREE.Mesh(grilleGeo, black);
-  grille.position.set(0, 0.2, 4.51);
+  grille.position.set(0, 0.7, 5.51);
   bus.add(grille);
 
   // Headlights
-  const headlightGeo = new THREE.BoxGeometry(0.4, 0.3, 0.1);
+  const headlightGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16);
   const headlightL = new THREE.Mesh(headlightGeo, light);
-  headlightL.position.set(-1, 0, 4.51);
+  headlightL.position.set(-1, 0.7, 5.51);
+  headlightL.rotation.z = Math.PI / 2;
   bus.add(headlightL);
   const headlightR = headlightL.clone();
   headlightR.position.x = 1;
   bus.add(headlightR);
+  
+  // Taillights
+  const taillightGeo = new THREE.BoxGeometry(0.2, 0.4, 0.1);
+  const taillightL = new THREE.Mesh(taillightGeo, red);
+  taillightL.position.set(-1.2, 0.8, -4.51);
+  bus.add(taillightL);
+  const taillightR = taillightL.clone();
+  taillightR.position.x = 1.2;
+  bus.add(taillightR);
+
 
   // Windshield
   const windshieldGeo = new THREE.PlaneGeometry(2.4, 1.2);
   const windshield = new THREE.Mesh(windshieldGeo, glass);
-  windshield.position.set(0, 1.2, 4.7);
-  windshield.rotation.x = 0.15;
+  windshield.position.set(0, 1.6, 4.5);
   bus.add(windshield);
 
   // Side Windows
-  const sideWindowGeo = new THREE.PlaneGeometry(1.5, 0.8);
+  const sideWindowGeo = new THREE.PlaneGeometry(1.8, 0.8);
   for(let i=0; i<4; i++){
     const sideWindowL = new THREE.Mesh(sideWindowGeo, glass);
-    sideWindowL.position.set(-1.41, 1.3, -2 + i * 1.8);
+    sideWindowL.position.set(-1.41, 1.7, -2 + i * 2);
     sideWindowL.rotation.y = Math.PI/2;
     bus.add(sideWindowL);
 
     const sideWindowR = new THREE.Mesh(sideWindowGeo, glass);
-    sideWindowR.position.set(1.41, 1.3, -2 + i * 1.8);
+    sideWindowR.position.set(1.41, 1.7, -2 + i * 2);
     sideWindowR.rotation.y = -Math.PI/2;
     bus.add(sideWindowR);
   }
   
   // Door
-  const doorGeo = new THREE.PlaneGeometry(1, 1.6);
+  const doorGeo = new THREE.PlaneGeometry(1, 1.8);
   const door = new THREE.Mesh(doorGeo, glass);
-  door.position.set(1.41, 0.8, 3.5);
+  door.position.set(1.41, 1.2, 3.5);
   door.rotation.y = -Math.PI/2;
   bus.add(door);
   
   // Wheels
-  const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 24);
+  const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 24);
+  const wheelMaterial = new THREE.MeshLambertMaterial({ color: 0x333333 });
   const wheelPositions = [
     {x: -1.5, z: 3.5}, {x: 1.5, z: 3.5},
     {x: -1.5, z: -3.5}, {x: 1.5, z: -3.5},
   ];
   wheelPositions.forEach(pos => {
-    const wheel = new THREE.Mesh(wheelGeo, black);
+    const wheel = new THREE.Mesh(wheelGeo, wheelMaterial);
     wheel.rotation.z = Math.PI / 2;
     wheel.position.set(pos.x, 0, pos.z);
     bus.add(wheel);
@@ -372,39 +375,105 @@ export function createStudents(): THREE.Mesh[] {
 
 // Create obstacles
 export function createObstacles(): THREE.Mesh[] {
-    const obstacles: THREE.Mesh[] = [];
+    const obstacles: (THREE.Mesh | THREE.Group)[] = [];
   
-    // Cars
-    const carMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-    const carGeometry = new THREE.BoxGeometry(2, 1, 4);
-    for (let i = 0; i < 4; i++) {
-      const car = new THREE.Mesh(carGeometry, carMaterial);
+    // Car
+    const createCar = () => {
+      const car = new THREE.Group();
+      const bodyMat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+      const body = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 4), bodyMat);
+      body.position.y = 0.5;
+      car.add(body);
+      const cabinMat = new THREE.MeshLambertMaterial({ color: 0xcc0000 });
+      const cabin = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 2.5), cabinMat);
+      cabin.position.y = 1.4;
+      car.add(cabin);
       car.name = 'car';
-      car.position.set(Math.random() > 0.5 ? -6: -2, 0.5, -70 - i * 100);
-      obstacles.push(car);
+      car.userData = { type: 'car' };
+      return car;
     }
 
-    // Bikes
-    const bikeMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
-    const bikeGeometry = new THREE.BoxGeometry(0.5, 0.8, 1.5);
-     for (let i = 0; i < 4; i++) {
-      const bike = new THREE.Mesh(bikeGeometry, bikeMaterial);
-      bike.name = 'bike';
-      bike.position.set(Math.random() > 0.5 ? 6 : 2, 0.4, -40 - i * 120);
-      obstacles.push(bike);
+    // Bike
+    const createBike = () => {
+        const bike = new THREE.Group();
+        const frameMat = new THREE.MeshLambertMaterial({color: 0x00ff00});
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.7, 1.8), frameMat);
+        frame.position.y = 0.35;
+        bike.add(frame);
+        const wheelGeo = new THREE.CylinderGeometry(0.3,0.3,0.1,16);
+        const wheelMat = new THREE.MeshLambertMaterial({color: 0x333333});
+        const wheelF = new THREE.Mesh(wheelGeo, wheelMat);
+        wheelF.rotation.z = Math.PI / 2;
+        wheelF.position.set(0, 0.3, 0.7);
+        bike.add(wheelF);
+        const wheelB = wheelF.clone();
+        wheelB.position.z = -0.7;
+        bike.add(wheelB);
+        bike.name = 'bike';
+        bike.userData = { type: 'bike' };
+        return bike;
     }
-  
-    // Cows
-    const cowMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
-    const cowGeometry = new THREE.BoxGeometry(1.5, 1, 2.5);
+
+    // Truck
+    const createTruck = () => {
+        const truck = new THREE.Group();
+        const cabinMat = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2, 2.5), cabinMat);
+        cabin.position.set(0, 1, 3);
+        truck.add(cabin);
+        const cargoMat = new THREE.MeshLambertMaterial({ color: 0x808080 });
+        const cargo = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.2, 5), cargoMat);
+        cargo.position.set(0, 1.1, -1);
+        truck.add(cargo);
+        truck.name = 'truck';
+        truck.userData = { type: 'truck' };
+        return truck;
+    }
+
+    // Cow
+    const createCow = () => {
+        const cow = new THREE.Group();
+        const bodyMat = new THREE.MeshLambertMaterial({ color: 0x964B00 });
+        const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1.8), bodyMat);
+        body.position.y = 0.7;
+        cow.add(body);
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), bodyMat);
+        head.position.set(0, 1, 1);
+        cow.add(head);
+        cow.name = 'cow';
+        cow.userData = { type: 'cow' };
+        return cow;
+    }
+    
+    // Create instances
     for (let i = 0; i < 3; i++) {
-      const cow = new THREE.Mesh(cowGeometry, cowMaterial);
-      cow.name = 'cow';
-      cow.position.set((Math.random()-0.5)*16, 0.5, -100 - i * 150);
+        const car = createCar();
+        car.position.set(-6, 0, -70 - i * 120 - Math.random()*50);
+        car.userData.speed = 20 + Math.random() * 10;
+        obstacles.push(car);
+    }
+    
+    for (let i = 0; i < 3; i++) {
+        const bike = createBike();
+        bike.position.set(10, 0, -40 - i * 150 - Math.random()*50);
+        bike.userData.speed = 30 + Math.random() * 10;
+        obstacles.push(bike);
+    }
+    
+    for (let i = 0; i < 2; i++) {
+        const truck = createTruck();
+        truck.position.set(6, 0, -150 - i * 180 - Math.random()*50);
+        truck.userData.speed = 15 + Math.random() * 5;
+        obstacles.push(truck);
+    }
+
+    for (let i = 0; i < 3; i++) {
+      const cow = createCow();
+      cow.position.set((Math.random()-0.5)*16, 0, -100 - i * 150);
       obstacles.push(cow);
     }
   
-    return obstacles;
+    return obstacles as THREE.Mesh[];
 }
 
 // Create the school compound
@@ -468,5 +537,4 @@ export function createZebraCross(): THREE.Group {
     zebraCross.position.z = -450;
     return zebraCross;
 }
-
     
