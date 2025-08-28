@@ -6,7 +6,7 @@ import Image from "next/image";
 import { ControlsGuide } from "./ControlsGuide";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops, createUTurnMarkings } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops, createMountains } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -66,8 +66,9 @@ export default function Game() {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xF2F0E1);
-    scene.fog = new THREE.Fog(0xF2F0E1, 150, 400);
+    const sunriseColor = 0xFFDAB9; // PeachPuff
+    scene.background = new THREE.Color(sunriseColor);
+    scene.fog = new THREE.Fog(sunriseColor, 150, 400);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 5, 10);
@@ -78,9 +79,9 @@ export default function Game() {
     mount.appendChild(renderer.domElement);
 
     // Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    dirLight.position.set(20, 50, 20);
+    scene.add(new THREE.AmbientLight(0xFFE4B5, 1.2)); // Moccasin
+    const dirLight = new THREE.DirectionalLight(0xFF8C00, 2); // DarkOrange
+    dirLight.position.set(100, 100, 50);
     dirLight.castShadow = true;
     scene.add(dirLight);
 
@@ -94,11 +95,11 @@ export default function Game() {
     scene.add(createRoad());
     scene.add(createRoadMarkings());
     scene.add(createZebraCross());
-    scene.add(createUTurnMarkings());
     scene.add(createScenery());
     scene.add(createTrees());
     scene.add(createShops());
     scene.add(createSchool());
+    scene.add(createMountains());
     
     const initialStudents = createStudents();
     studentsRef.current = initialStudents;

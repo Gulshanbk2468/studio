@@ -296,39 +296,6 @@ export function createShops(): THREE.Group {
     return shops;
 }
 
-export function createUTurnMarkings(): THREE.Group {
-    const markings = new THREE.Group();
-    const material = new THREE.MeshBasicMaterial({ color: 0xFFD700 }); // Yellow
-  
-    const createUTurn = (z: number) => {
-      const uTurn = new THREE.Group();
-      const arcShape = new THREE.Shape();
-      arcShape.moveTo(0, 0);
-      arcShape.absarc(0, 0, 3.5, 0, Math.PI, false);
-      arcShape.absarc(0, 0, 2.5, Math.PI, 0, true);
-  
-      const geometry = new THREE.ShapeGeometry(arcShape);
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.rotation.x = -Math.PI / 2;
-      mesh.position.z = z;
-      
-      const arrowHeadGeo = new THREE.ConeGeometry(0.8, 1, 4);
-      const arrowHead = new THREE.Mesh(arrowHeadGeo, material);
-      arrowHead.position.set(2.5, 0, z+1);
-      arrowHead.rotation.set(-Math.PI/2, 0, -Math.PI/4);
-      
-      uTurn.add(mesh);
-      uTurn.add(arrowHead);
-      return uTurn;
-    }
-  
-    markings.add(createUTurn(-200));
-    markings.add(createUTurn(-400));
-  
-    return markings;
-}
-  
-
 // Create scenery
 export function createScenery(): THREE.Group {
   const scenery = new THREE.Group();
@@ -342,28 +309,61 @@ export function createScenery(): THREE.Group {
   ground.position.z = -200;
   scenery.add(ground);
 
-  // Hills
-  const hillMaterial = new THREE.MeshLambertMaterial({ color: 0x556B2F }); // DarkOliveGreen
-  const hillGeometry = new THREE.ConeGeometry(50, 30, 16);
-  for (let i = 0; i < 10; i++) {
-    const hill = new THREE.Mesh(hillGeometry, hillMaterial);
-    
-    // Position hills away from the road
-    const side = Math.random() > 0.5 ? 1 : -1;
-    const xPos = side * (50 + Math.random() * 150); // Position between 50 and 200 units away from center
-
-    hill.position.set(
-      xPos,
-      14,
-      -200 - Math.random() * 150
-    );
-    scenery.add(hill);
-  }
-
   scenery.add(createHouses());
 
   return scenery;
 }
+
+export function createMountains(): THREE.Group {
+    const mountains = new THREE.Group();
+    const mountainMaterial = new THREE.MeshLambertMaterial({ color: 0x9370DB, side: THREE.DoubleSide }); // MediumPurple
+    const snowMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFAFA }); // Snow
+  
+    const createMountain = (size: number, height: number) => {
+      const mountain = new THREE.Group();
+      const mountainShape = new THREE.Shape();
+      mountainShape.moveTo(-size/2, 0);
+      mountainShape.lineTo(0, height);
+      mountainShape.lineTo(size/2, 0);
+      mountainShape.lineTo(-size/2, 0);
+  
+      const extrudeSettings = { depth: 4, bevelEnabled: false };
+      const geometry = new THREE.ExtrudeGeometry(mountainShape, extrudeSettings);
+      const mesh = new THREE.Mesh(geometry, mountainMaterial);
+      
+      // Add snow cap
+      const snowShape = new THREE.Shape();
+      const snowHeight = height * 0.4;
+      snowShape.moveTo(0, height);
+      snowShape.lineTo(-size / (height / snowHeight * 2), height - snowHeight);
+      snowShape.lineTo(size / (height / snowHeight * 2), height - snowHeight);
+      snowShape.lineTo(0, height);
+
+      const snowGeometry = new THREE.ExtrudeGeometry(snowShape, { ...extrudeSettings, depth: 4.1 });
+      const snowMesh = new THREE.Mesh(snowGeometry, snowMaterial);
+
+      mountain.add(mesh);
+      mountain.add(snowMesh);
+
+      return mountain;
+    };
+  
+    const mountainRanges = [
+      { size: 100, height: 80, x: -150, z: -350 },
+      { size: 150, height: 120, x: 50, z: -400 },
+      { size: 80, height: 60, x: 200, z: -300 },
+      { size: 120, height: 100, x: -250, z: -250 },
+    ];
+  
+    mountainRanges.forEach(range => {
+      const mountain = createMountain(range.size, range.height);
+      mountain.position.set(range.x, 0, range.z);
+      mountain.rotation.y = Math.random() * Math.PI;
+      mountains.add(mountain);
+    });
+  
+    return mountains;
+  }
 
 // Create students at bus stops
 export function createStudents(): THREE.Mesh[] {
