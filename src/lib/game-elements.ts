@@ -69,7 +69,7 @@ export function createBus(): THREE.Group {
 // Create the road
 export function createRoad(): THREE.Mesh {
   const roadLength = 500;
-  const roadGeometry = new THREE.PlaneGeometry(18, roadLength);
+  const roadGeometry = new THREE.PlaneGeometry(24, roadLength);
   const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
   const road = new THREE.Mesh(roadGeometry, roadMaterial);
   road.rotation.x = -Math.PI / 2;
@@ -83,11 +83,13 @@ export function createRoadMarkings(): THREE.Group {
     const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const lineGeometry = new THREE.BoxGeometry(0.2, 0.01, 3);
     
-    for (let j = -1; j <= 1; j += 2) {
+    // 3 lanes on each side means 2 dividing lines per side.
+    for (let j = -2; j <= 2; j++) {
+      if (j === 0) continue; // Center is open
       for (let i = 0; i < 60; i++) {
           const line = new THREE.Mesh(lineGeometry, lineMaterial);
           line.position.z = -i * 8;
-          line.position.x = j * 3;
+          line.position.x = j * 4;
           markings.add(line);
       }
     }
@@ -140,7 +142,7 @@ function createHouses(): THREE.Group {
       const house = isModern ? createModernHouse() : createOldHouse();
       const onLeftSide = Math.random() > 0.5;
       
-      house.position.x = onLeftSide ? -15 : 15;
+      house.position.x = onLeftSide ? -20 : 20; // Pushed further out
       house.position.z = -20 - i * 55 - Math.random() * 20;
       house.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
       
@@ -192,7 +194,7 @@ export function createStudents(): THREE.Mesh[] {
   busStops.forEach(zPos => {
     for(let i=0; i<2; i++) {
       const student = new THREE.Mesh(studentGeometry, studentMaterial);
-      student.position.set(10 + Math.random(), 0.75, zPos + (Math.random()-0.5)*5);
+      student.position.set(13 + Math.random(), 0.75, zPos + (Math.random()-0.5)*5);
       student.name = `student_stop_${zPos}`;
       students.push(student);
     }
@@ -210,7 +212,7 @@ export function createObstacles(): THREE.Mesh[] {
     for (let i = 0; i < 4; i++) {
       const car = new THREE.Mesh(carGeometry, carMaterial);
       car.name = 'car';
-      car.position.set(Math.random() > 0.5 ? -4.5: -1.5, 0.5, -70 - i * 100);
+      car.position.set(Math.random() > 0.5 ? -6: -2, 0.5, -70 - i * 100);
       obstacles.push(car);
     }
 
@@ -220,7 +222,7 @@ export function createObstacles(): THREE.Mesh[] {
      for (let i = 0; i < 4; i++) {
       const bike = new THREE.Mesh(bikeGeometry, bikeMaterial);
       bike.name = 'bike';
-      bike.position.set(Math.random() > 0.5 ? 4.5 : 1.5, 0.4, -40 - i * 120);
+      bike.position.set(Math.random() > 0.5 ? 6 : 2, 0.4, -40 - i * 120);
       obstacles.push(bike);
     }
   
@@ -252,10 +254,10 @@ export function createSchool(): THREE.Group {
     const postMat = new THREE.MeshLambertMaterial({ color: 0x808080 }); // Gray
     const postGeo = new THREE.BoxGeometry(0.5, 5, 0.5);
     const post1 = new THREE.Mesh(postGeo, postMat);
-    post1.position.set(6.25, 2.5, 5);
+    post1.position.set(8.25, 2.5, 5);
     gate.add(post1);
     const post2 = post1.clone();
-    post2.position.x = -6.25;
+    post2.position.x = -8.25;
     gate.add(post2);
 
     // Gate Sign
@@ -274,7 +276,7 @@ export function createSchool(): THREE.Group {
     }
     const texture = new THREE.CanvasTexture(canvas);
     const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(12, 1.5), signMaterial);
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(16, 1.5), signMaterial);
     sign.position.y = 4;
     gate.add(sign);
     gate.position.z = 2;
@@ -286,13 +288,13 @@ export function createSchool(): THREE.Group {
 export function createZebraCross(): THREE.Group {
     const zebraCross = new THREE.Group();
     const stripeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const stripeGeometry = new THREE.BoxGeometry(1.5, 0.02, 18);
+    const stripeGeometry = new THREE.BoxGeometry(1.5, 0.02, 24);
     for (let i = 0; i < 7; i++) {
         const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
         stripe.rotation.y = Math.PI / 2;
-        stripe.position.z = -100 + i * 1.5;
+        stripe.position.z = 50 - i * 2.5; // Starts after 500m (since road starts at z=50 and goes to -450)
         zebraCross.add(stripe);
     }
-    zebraCross.position.z = -250;
+    zebraCross.position.z = -450;
     return zebraCross;
 }

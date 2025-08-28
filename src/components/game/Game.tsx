@@ -127,7 +127,7 @@ export default function Game() {
       if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
       
       // Keep bus on road
-      bus.position.x = Math.max(-8, Math.min(8, bus.position.x));
+      bus.position.x = Math.max(-12, Math.min(12, bus.position.x));
       bus.position.z = Math.max(-490, Math.min(20, bus.position.z));
       
       // Camera follow
