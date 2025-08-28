@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { Dashboard } from "./Dashboard";
 import { ControlsGuide } from "./ControlsGuide";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
