@@ -245,4 +245,3 @@ export default function Game() {
       <div ref={mountRef} className="h-full w-full" />
     </div>
   );
-}
