@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import * as THREE from "three";
+import Image from "next/image";
 import { ControlsGuide } from "./ControlsGuide";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops, createUTurnMarkings } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
@@ -86,6 +87,9 @@ export default function Game() {
     // Game elements
     const bus = createBus();
     scene.add(bus);
+    bus.position.x = 20;
+    bus.position.z = 10;
+    bus.rotation.y = -Math.PI / 2;
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
@@ -123,13 +127,13 @@ export default function Game() {
       const moveSpeed = 15.0 * delta;
       const turnSpeed = 0.8 * delta;
 
-      if (keysPressed['arrowup']) bus.position.z -= moveSpeed;
-      if (keysPressed['arrowdown']) bus.position.z += moveSpeed;
+      if (keysPressed['arrowup']) bus.translateZ(-moveSpeed);
+      if (keysPressed['arrowdown']) bus.translateZ(moveSpeed);
       if (keysPressed['arrowleft']) bus.rotation.y += turnSpeed;
       if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
       
       // Keep bus on road
-      bus.position.x = Math.max(-12, Math.min(12, bus.position.x));
+      bus.position.x = Math.max(-12, Math.min(30, bus.position.x));
       bus.position.z = Math.max(-490, Math.min(20, bus.position.z));
       
       // Camera follow
@@ -177,7 +181,7 @@ export default function Game() {
       });
 
       // Finish condition
-      if(studentsCollected === totalStudents && bus.position.z > 0 && bus.position.z < 10) {
+      if(studentsCollected === totalStudents && bus.position.z > -5 && bus.position.z < 20 && bus.position.x > 15) {
         setGameState("finished");
       }
 
@@ -211,7 +215,7 @@ export default function Game() {
     setInfractionCount(0);
     setStudentsCollected(0);
     setGameState("playing");
-    addLog("Game started. Pick up all students.");
+    addLog("Game started. Pick up all students and return to school.");
   };
 
   const restartGame = () => {
@@ -220,6 +224,11 @@ export default function Game() {
 
   return (
     <div className="relative h-screen w-screen">
+       <header className="absolute top-0 left-0 right-0 z-20 flex justify-center p-4">
+        <h1 className="text-2xl md:text-4xl font-bold font-headline text-center bg-primary/80 text-primary-foreground py-2 px-6 rounded-lg shadow-lg backdrop-blur-sm">
+          Hemja Highway Hero
+        </h1>
+      </header>
       {gameState === 'playing' && (
         <>
           <ControlsGuide />
@@ -227,11 +236,23 @@ export default function Game() {
       )}
 
       {gameState === 'menu' && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
-          <Card className="max-w-md p-6 text-center">
-            <h2 className="text-2xl font-bold font-headline mb-2">Welcome to Hemja Highway Hero!</h2>
-            <p className="text-muted-foreground mb-4">Your mission is to safely pick up all the students waiting at bus stops and bring them back to school. Avoid obstacles on the road. Good luck!</p>
-            <Button onClick={startGame} size="lg">Start Driving</Button>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md animate-fade-in">
+          <Card className="max-w-xl p-4 text-center shadow-2xl">
+            <CardHeader className="p-2">
+                <Image 
+                    src="https://picsum.photos/800/400" 
+                    width={800} 
+                    height={400} 
+                    alt="Shree Ambika Secondary School"
+                    data-ai-hint="school building" 
+                    className="rounded-t-lg"
+                />
+            </CardHeader>
+            <CardContent className="p-4">
+                <h2 className="text-3xl font-bold font-headline mb-2">Shree Ambika Secondary School</h2>
+                <p className="text-muted-foreground mb-6">Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!</p>
+                <Button onClick={startGame} size="lg" className="text-lg">Start Driving</Button>
+            </CardContent>
           </Card>
         </div>
       )}
@@ -251,4 +272,3 @@ export default function Game() {
     </div>
   );
 }
-    

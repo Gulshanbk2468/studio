@@ -3,14 +3,14 @@ import * as THREE from 'three';
 // Create the school bus
 export function createBus(): THREE.Group {
   const bus = new THREE.Group();
-  bus.position.y = 0.4;
-  
-  const busYellow = new THREE.MeshLambertMaterial({ color: 0xFFD700 });
+  bus.name = "bus";
+  bus.position.y = 1;
+
+  const busYellow = new THREE.MeshLambertMaterial({ color: 0xE2A900 });
   const black = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
-  const grey = new THREE.MeshLambertMaterial({ color: 0x808080 });
   const glass = new THREE.MeshLambertMaterial({ color: 0x222222, transparent: true, opacity: 0.5 });
-  const light = new THREE.MeshLambertMaterial({ color: 0xFFFF00 });
-  const red = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
+  const light = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
+  const red = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
 
   // Main body
   const bodyGeo = new THREE.BoxGeometry(2.8, 2.2, 9);
@@ -19,9 +19,10 @@ export function createBus(): THREE.Group {
   bus.add(body);
   
   // Front cabin shape
-  const frontGeo = new THREE.BoxGeometry(2.8, 1.5, 1);
+  const frontGeo = new THREE.BoxGeometry(2.8, 1.8, 1);
   const front = new THREE.Mesh(frontGeo, busYellow);
-  front.position.set(0, 0.75, 5);
+  front.position.set(0, 0.9, 5);
+  front.rotation.x = 0.1;
   bus.add(front);
 
   // Roof
@@ -61,23 +62,25 @@ export function createBus(): THREE.Group {
   taillightR.position.x = 1.2;
   bus.add(taillightR);
 
-
   // Windshield
   const windshieldGeo = new THREE.PlaneGeometry(2.4, 1.2);
   const windshield = new THREE.Mesh(windshieldGeo, glass);
-  windshield.position.set(0, 1.6, 4.5);
+  windshield.position.set(0, 1.6, 4.55);
+  windshield.rotation.x = 0.1;
   bus.add(windshield);
 
   // Side Windows
   const sideWindowGeo = new THREE.PlaneGeometry(1.8, 0.8);
   for(let i=0; i<4; i++){
+    const windowYPos = 1.7;
+    const windowZPos = -2.5 + i * 1.9;
     const sideWindowL = new THREE.Mesh(sideWindowGeo, glass);
-    sideWindowL.position.set(-1.41, 1.7, -2 + i * 2);
+    sideWindowL.position.set(-1.41, windowYPos, windowZPos);
     sideWindowL.rotation.y = Math.PI/2;
     bus.add(sideWindowL);
 
     const sideWindowR = new THREE.Mesh(sideWindowGeo, glass);
-    sideWindowR.position.set(1.41, 1.7, -2 + i * 2);
+    sideWindowR.position.set(1.41, windowYPos, windowZPos);
     sideWindowR.rotation.y = -Math.PI/2;
     bus.add(sideWindowR);
   }
@@ -99,7 +102,7 @@ export function createBus(): THREE.Group {
   wheelPositions.forEach(pos => {
     const wheel = new THREE.Mesh(wheelGeo, wheelMaterial);
     wheel.rotation.z = Math.PI / 2;
-    wheel.position.set(pos.x, 0, pos.z);
+    wheel.position.set(pos.x, -0.5, pos.z);
     bus.add(wheel);
   });
   
@@ -109,21 +112,23 @@ export function createBus(): THREE.Group {
   canvas.height = 128;
   const context = canvas.getContext('2d');
   if (context) {
-    context.fillStyle = '#000000';
-    context.font = 'bold 32px PT Sans';
+    context.fillStyle = '#B82E00'; // Dark Red
+    context.font = 'bold 36px "PT Sans"';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     context.fillText('Shree Ambika Secondary School', 512, 64);
   }
   const texture = new THREE.CanvasTexture(canvas);
   const textMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-  const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(8, 1), textMaterial);
-  textMesh.position.set(-1.41, 1.3, 0);
-  textMesh.rotation.y = Math.PI / 2;
-  bus.add(textMesh.clone());
-  textMesh.position.x = 1.41;
-  textMesh.rotation.y = -Math.PI / 2;
-  bus.add(textMesh);
+  const textMeshL = new THREE.Mesh(new THREE.PlaneGeometry(8, 1), textMaterial);
+  textMeshL.position.set(-1.41, 1.3, 0);
+  textMeshL.rotation.y = Math.PI / 2;
+  bus.add(textMeshL);
+  
+  const textMeshR = new THREE.Mesh(new THREE.PlaneGeometry(8, 1), textMaterial.clone());
+  textMeshR.position.set(1.41, 1.3, 0);
+  textMeshR.rotation.y = -Math.PI / 2;
+  bus.add(textMeshR);
 
 
   return bus;
@@ -273,7 +278,7 @@ export function createShops(): THREE.Group {
         const texture = new THREE.CanvasTexture(canvas);
         const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
         const sign = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), signMaterial);
-        sign.position.set(0, 4, 3.01);
+        sign.position.set(0, 3.5, 3.01);
         shop.add(sign);
     
         return shop;
@@ -485,10 +490,23 @@ export function createObstacles(): THREE.Mesh[] {
 export function createSchool(): THREE.Group {
     const school = new THREE.Group();
 
-    // Building
-    const buildingMat = new THREE.MeshLambertMaterial({ color: 0xD2B48C }); // Tan
-    const building = new THREE.Mesh(new THREE.BoxGeometry(20, 10, 8), buildingMat);
-    building.position.set(30, 5, 10);
+    // Compound Wall
+    const wallMat = new THREE.MeshLambertMaterial({ color: 0xD2B48C }); // Tan
+    const wallGeo = new THREE.BoxGeometry(0.2, 4, 30);
+    const backWall = new THREE.Mesh(wallGeo, wallMat);
+    backWall.position.set(35, 2, 5);
+    school.add(backWall);
+
+    const sideWall = new THREE.Mesh(new THREE.BoxGeometry(20, 4, 0.2), wallMat);
+    sideWall.position.set(25, 2, 20);
+    school.add(sideWall);
+    const sideWall2 = sideWall.clone();
+    sideWall2.position.z = -10;
+    school.add(sideWall2);
+
+    // School Building (simplified)
+    const building = new THREE.Mesh(new THREE.BoxGeometry(15, 10, 8), wallMat);
+    building.position.set(28, 5, 5);
     school.add(building);
 
     // Gate
@@ -496,34 +514,32 @@ export function createSchool(): THREE.Group {
     const postMat = new THREE.MeshLambertMaterial({ color: 0x808080 }); // Gray
     const postGeo = new THREE.BoxGeometry(0.5, 5, 0.5);
     const post1 = new THREE.Mesh(postGeo, postMat);
-    post1.position.set(8.25, 2.5, 5);
+    post1.position.set(15, 2.5, 20.25);
     gate.add(post1);
+    
     const post2 = post1.clone();
-    post2.position.x = -8.25;
+    post2.position.x = 25;
     gate.add(post2);
 
     // Gate Sign
     const canvas = document.createElement('canvas');
-    canvas.width = 1024;
+    canvas.width = 512;
     canvas.height = 128;
     const context = canvas.getContext('2d');
     if (context) {
         context.fillStyle = '#003366';
-        context.fillRect(0,0,1024,128);
+        context.fillRect(0,0,512,128);
         context.fillStyle = 'white';
-        context.font = 'bold 48px PT Sans';
+        context.font = 'bold 32px "PT Sans"';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-        context.fillText('Shree Ambika Secondary School', 512, 64);
+        context.fillText('Shree Ambika Secondary School', 256, 64);
     }
     const texture = new THREE.CanvasTexture(canvas);
     const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(16, 1.5), signMaterial);
-    sign.position.y = 4;
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(10, 2), signMaterial);
+    sign.position.set(20, 5.5, 20.25);
     gate.add(sign);
-    gate.position.z = 2;
-    gate.position.x = 15;
-
 
     school.add(gate);
     return school;
