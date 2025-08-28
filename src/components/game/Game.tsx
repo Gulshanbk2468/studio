@@ -121,7 +121,7 @@ export default function Game() {
       animationFrameId = requestAnimationFrame(animate);
       const delta = clock.getDelta();
       const moveSpeed = 15.0 * delta;
-      const turnSpeed = 1.0 * delta;
+      const turnSpeed = 0.8 * delta;
 
       if (keysPressed['arrowup']) bus.position.z -= moveSpeed;
       if (keysPressed['arrowdown']) bus.position.z += moveSpeed;

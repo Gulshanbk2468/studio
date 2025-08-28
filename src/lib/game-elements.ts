@@ -3,68 +3,129 @@ import * as THREE from 'three';
 // Create the school bus
 export function createBus(): THREE.Group {
   const bus = new THREE.Group();
+  bus.position.y = 0.4;
+  
+  const busYellow = new THREE.MeshLambertMaterial({ color: 0xFFD700 });
+  const black = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
+  const grey = new THREE.MeshLambertMaterial({ color: 0x808080 });
+  const glass = new THREE.MeshLambertMaterial({ color: 0x222222, transparent: true, opacity: 0.5 });
+  const light = new THREE.MeshLambertMaterial({ color: 0xFFFF00 });
 
-  const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0xE2A900 }); // Saturated Yellow
-  const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.2, 5), bodyMaterial);
-  body.position.y = 0.6;
+  // Main body
+  const bodyGeo = new THREE.BoxGeometry(2.8, 1.8, 8);
+  const body = new THREE.Mesh(bodyGeo, busYellow);
+  body.position.y = 1;
   bus.add(body);
   
-  const top = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.8, 4), bodyMaterial);
-  top.position.y = 1.6;
-  bus.add(top);
+  // Front cabin
+  const cabinGeo = new THREE.BoxGeometry(2.8, 1.8, 1.5);
+  const cabin = new THREE.Mesh(cabinGeo, busYellow);
+  cabin.position.set(0, 1, 4.75);
+  // Taper the front
+  const pos = cabin.geometry.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const z = pos.getZ(i);
+    if (z > 0) {
+      pos.setY(i, pos.getY(i) + 0.3 * (z/0.75));
+    }
+  }
+  pos.needsUpdate = true;
+  bus.add(cabin);
 
-  const windowMaterial = new THREE.MeshLambertMaterial({ color: 0x000000, transparent: true, opacity: 0.5 });
-  const frontWindow = new THREE.Mesh(new THREE.PlaneGeometry(2, 0.6), windowMaterial);
-  frontWindow.position.set(0, 1.6, 2.51);
-  bus.add(frontWindow);
-  
-  const sideWindow = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 0.5), windowMaterial);
-  sideWindow.position.set(1.16, 1.6, 0);
-  sideWindow.rotation.y = Math.PI / 2;
-  bus.add(sideWindow.clone());
-  sideWindow.position.x = -1.16;
-  bus.add(sideWindow);
+  // Roof
+  const roofGeo = new THREE.BoxGeometry(2.6, 0.2, 8.5);
+  const roof = new THREE.Mesh(roofGeo, busYellow);
+  roof.position.y = 2.1;
+  bus.add(roof);
 
-  const wheelMaterial = new THREE.MeshLambertMaterial({ color: 0x1a1a1a });
-  const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.3, 18);
+  // Bumper
+  const bumperGeo = new THREE.BoxGeometry(2.8, 0.4, 0.5);
+  const bumper = new THREE.Mesh(bumperGeo, grey);
+  bumper.position.set(0, -0.2, 4.5);
+  bus.add(bumper);
+
+  // Grille
+  const grilleGeo = new THREE.PlaneGeometry(2, 0.5);
+  const grille = new THREE.Mesh(grilleGeo, black);
+  grille.position.set(0, 0.2, 4.51);
+  bus.add(grille);
+
+  // Headlights
+  const headlightGeo = new THREE.BoxGeometry(0.4, 0.3, 0.1);
+  const headlightL = new THREE.Mesh(headlightGeo, light);
+  headlightL.position.set(-1, 0, 4.51);
+  bus.add(headlightL);
+  const headlightR = headlightL.clone();
+  headlightR.position.x = 1;
+  bus.add(headlightR);
+
+  // Windshield
+  const windshieldGeo = new THREE.PlaneGeometry(2.4, 1.2);
+  const windshield = new THREE.Mesh(windshieldGeo, glass);
+  windshield.position.set(0, 1.2, 4.7);
+  windshield.rotation.x = 0.15;
+  bus.add(windshield);
+
+  // Side Windows
+  const sideWindowGeo = new THREE.PlaneGeometry(1.5, 0.8);
+  for(let i=0; i<4; i++){
+    const sideWindowL = new THREE.Mesh(sideWindowGeo, glass);
+    sideWindowL.position.set(-1.41, 1.3, -2 + i * 1.8);
+    sideWindowL.rotation.y = Math.PI/2;
+    bus.add(sideWindowL);
+
+    const sideWindowR = new THREE.Mesh(sideWindowGeo, glass);
+    sideWindowR.position.set(1.41, 1.3, -2 + i * 1.8);
+    sideWindowR.rotation.y = -Math.PI/2;
+    bus.add(sideWindowR);
+  }
   
-  const wheels: [number, number, number][] = [
-    [1.3, 0.4, 1.8], [-1.3, 0.4, 1.8],
-    [1.3, 0.4, -1.8], [-1.3, 0.4, -1.8],
+  // Door
+  const doorGeo = new THREE.PlaneGeometry(1, 1.6);
+  const door = new THREE.Mesh(doorGeo, glass);
+  door.position.set(1.41, 0.8, 3.5);
+  door.rotation.y = -Math.PI/2;
+  bus.add(door);
+  
+  // Wheels
+  const wheelGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.4, 24);
+  const wheelPositions = [
+    {x: -1.5, z: 3.5}, {x: 1.5, z: 3.5},
+    {x: -1.5, z: -3.5}, {x: 1.5, z: -3.5},
   ];
-
-  wheels.forEach(pos => {
-    const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+  wheelPositions.forEach(pos => {
+    const wheel = new THREE.Mesh(wheelGeo, black);
     wheel.rotation.z = Math.PI / 2;
-    wheel.position.set(pos[0], pos[1], pos[2]);
+    wheel.position.set(pos.x, 0, pos.z);
     bus.add(wheel);
   });
   
   // Add Text
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
+  canvas.width = 1024;
   canvas.height = 128;
   const context = canvas.getContext('2d');
   if (context) {
-    context.fillStyle = '#B82E00';
+    context.fillStyle = '#000000';
     context.font = 'bold 32px PT Sans';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillText('Shree Ambika Secondary School', 256, 64);
+    context.fillText('Shree Ambika Secondary School', 512, 64);
   }
   const texture = new THREE.CanvasTexture(canvas);
   const textMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-  const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), textMaterial);
-  textMesh.position.set(-1.26, 0.8, 0);
-  textMesh.rotation.y = -Math.PI / 2;
-  bus.add(textMesh.clone());
-  textMesh.position.x = 1.26;
+  const textMesh = new THREE.Mesh(new THREE.PlaneGeometry(8, 1), textMaterial);
+  textMesh.position.set(-1.41, 1.3, 0);
   textMesh.rotation.y = Math.PI / 2;
+  bus.add(textMesh.clone());
+  textMesh.position.x = 1.41;
+  textMesh.rotation.y = -Math.PI / 2;
   bus.add(textMesh);
 
 
   return bus;
 }
+
 
 // Create the road
 export function createRoad(): THREE.Mesh {
@@ -407,3 +468,5 @@ export function createZebraCross(): THREE.Group {
     zebraCross.position.z = -450;
     return zebraCross;
 }
+
+    
