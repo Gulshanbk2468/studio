@@ -2,11 +2,10 @@
 
 import * as React from "react";
 import * as THREE from "three";
-import { Dashboard } from "./Dashboard";
 import { ControlsGuide } from "./ControlsGuide";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops, createUTurnMarkings } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -91,7 +90,10 @@ export default function Game() {
     scene.add(createRoad());
     scene.add(createRoadMarkings());
     scene.add(createZebraCross());
+    scene.add(createUTurnMarkings());
     scene.add(createScenery());
+    scene.add(createTrees());
+    scene.add(createShops());
     scene.add(createSchool());
     
     const initialStudents = createStudents();
@@ -215,7 +217,6 @@ export default function Game() {
     <div className="relative h-screen w-screen">
       {gameState === 'playing' && (
         <>
-          <Dashboard score={score} log={gameLog} coachMessage={coachMessage} studentsCollected={studentsCollected} studentsToCollect={totalStudents} />
           <ControlsGuide />
         </>
       )}

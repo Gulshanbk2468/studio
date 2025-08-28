@@ -142,7 +142,7 @@ function createHouses(): THREE.Group {
       const house = isModern ? createModernHouse() : createOldHouse();
       const onLeftSide = Math.random() > 0.5;
       
-      house.position.x = onLeftSide ? -20 : 20; // Pushed further out
+      house.position.x = onLeftSide ? -25 : 25;
       house.position.z = -20 - i * 55 - Math.random() * 20;
       house.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
       
@@ -150,7 +150,114 @@ function createHouses(): THREE.Group {
     }
   
     return houses;
-  }
+}
+
+export function createTrees(): THREE.Group {
+    const trees = new THREE.Group();
+    const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B4513 }); // SaddleBrown
+    const leavesMat = new THREE.MeshLambertMaterial({ color: 0x006400 }); // DarkGreen
+    const trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+    const leavesGeo = new THREE.ConeGeometry(1.5, 4, 8);
+  
+    for (let i = 0; i < 40; i++) {
+      const tree = new THREE.Group();
+      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.position.y = 1;
+      tree.add(trunk);
+      const leaves = new THREE.Mesh(leavesGeo, leavesMat);
+      leaves.position.y = 2 + 2;
+      tree.add(leaves);
+  
+      const onLeftSide = Math.random() > 0.5;
+      tree.position.x = onLeftSide ? -18 - Math.random() * 5 : 18 + Math.random() * 5;
+      tree.position.z = -i * 12 - Math.random() * 5;
+      trees.add(tree);
+    }
+    return trees;
+}
+
+export function createShops(): THREE.Group {
+    const shops = new THREE.Group();
+    const shopNames = ['Kirana Store', 'Bakery', 'Electronics', 'Cafe'];
+  
+    const createShop = (name: string) => {
+        const shop = new THREE.Group();
+        const baseMat = new THREE.MeshLambertMaterial({ color: 0xA9A9A9 });
+        const base = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 6), baseMat);
+        base.position.y = 2.5;
+        shop.add(base);
+    
+        const awningMat = new THREE.MeshLambertMaterial({ color: 0xB22222 });
+        const awning = new THREE.Mesh(new THREE.BoxGeometry(8.2, 0.5, 2.5), awningMat);
+        awning.position.set(0, 4.5, 4);
+        awning.rotation.x = 0.2;
+        shop.add(awning);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 128;
+        const context = canvas.getContext('2d');
+        if (context) {
+            context.fillStyle = 'white';
+            context.fillRect(0, 0, 512, 128);
+            context.fillStyle = 'black';
+            context.font = 'bold 48px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(name, 256, 64);
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
+        const sign = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), signMaterial);
+        sign.position.set(0, 4, 3.01);
+        shop.add(sign);
+    
+        return shop;
+    }
+
+    for (let i = 0; i < 4; i++) {
+        const shop = createShop(shopNames[i]);
+        const onLeftSide = Math.random() > 0.5;
+        shop.position.x = onLeftSide ? -25 : 25;
+        shop.position.z = -50 - i * 100 - Math.random() * 20;
+        shop.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
+        shops.add(shop);
+    }
+  
+    return shops;
+}
+
+export function createUTurnMarkings(): THREE.Group {
+    const markings = new THREE.Group();
+    const material = new THREE.MeshBasicMaterial({ color: 0xFFD700 }); // Yellow
+  
+    const createUTurn = (z: number) => {
+      const uTurn = new THREE.Group();
+      const arcShape = new THREE.Shape();
+      arcShape.moveTo(0, 0);
+      arcShape.absarc(0, 0, 3.5, 0, Math.PI, false);
+      arcShape.absarc(0, 0, 2.5, Math.PI, 0, true);
+  
+      const geometry = new THREE.ShapeGeometry(arcShape);
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.z = z;
+      
+      const arrowHeadGeo = new THREE.ConeGeometry(0.8, 1, 4);
+      const arrowHead = new THREE.Mesh(arrowHeadGeo, material);
+      arrowHead.position.set(2.5, 0, z+1);
+      arrowHead.rotation.set(-Math.PI/2, 0, -Math.PI/4);
+      
+      uTurn.add(mesh);
+      uTurn.add(arrowHead);
+      return uTurn;
+    }
+  
+    markings.add(createUTurn(-200));
+    markings.add(createUTurn(-400));
+  
+    return markings;
+}
   
 
 // Create scenery
@@ -246,7 +353,7 @@ export function createSchool(): THREE.Group {
     // Building
     const buildingMat = new THREE.MeshLambertMaterial({ color: 0xD2B48C }); // Tan
     const building = new THREE.Mesh(new THREE.BoxGeometry(20, 10, 8), buildingMat);
-    building.position.set(20, 5, 10);
+    building.position.set(30, 5, 10);
     school.add(building);
 
     // Gate
@@ -280,6 +387,8 @@ export function createSchool(): THREE.Group {
     sign.position.y = 4;
     gate.add(sign);
     gate.position.z = 2;
+    gate.position.x = 15;
+
 
     school.add(gate);
     return school;
