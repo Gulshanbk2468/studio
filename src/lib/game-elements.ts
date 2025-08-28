@@ -342,8 +342,13 @@ export function createScenery(): THREE.Group {
   const hillGeometry = new THREE.ConeGeometry(50, 30, 16);
   for (let i = 0; i < 10; i++) {
     const hill = new THREE.Mesh(hillGeometry, hillMaterial);
+    
+    // Position hills away from the road
+    const side = Math.random() > 0.5 ? 1 : -1;
+    const xPos = side * (50 + Math.random() * 150); // Position between 50 and 200 units away from center
+
     hill.position.set(
-      (Math.random() - 0.5) * 400,
+      xPos,
       14,
       -200 - Math.random() * 150
     );
