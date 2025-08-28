@@ -68,8 +68,8 @@ export function createBus(): THREE.Group {
 
 // Create the road
 export function createRoad(): THREE.Mesh {
-  const roadLength = 400;
-  const roadGeometry = new THREE.PlaneGeometry(12, roadLength);
+  const roadLength = 500;
+  const roadGeometry = new THREE.PlaneGeometry(18, roadLength);
   const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
   const road = new THREE.Mesh(roadGeometry, roadMaterial);
   road.rotation.x = -Math.PI / 2;
@@ -82,14 +82,74 @@ export function createRoadMarkings(): THREE.Group {
     const markings = new THREE.Group();
     const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const lineGeometry = new THREE.BoxGeometry(0.2, 0.01, 3);
-    for (let i = 0; i < 50; i++) {
-        const line = new THREE.Mesh(lineGeometry, lineMaterial);
-        line.position.z = -i * 8;
-        markings.add(line);
+    
+    for (let j = -1; j <= 1; j += 2) {
+      for (let i = 0; i < 60; i++) {
+          const line = new THREE.Mesh(lineGeometry, lineMaterial);
+          line.position.z = -i * 8;
+          line.position.x = j * 3;
+          markings.add(line);
+      }
     }
     markings.position.z = -20;
     return markings;
 }
+
+function createHouses(): THREE.Group {
+    const houses = new THREE.Group();
+  
+    // Old style house
+    const createOldHouse = () => {
+      const house = new THREE.Group();
+      const baseMat = new THREE.MeshLambertMaterial({ color: 0xDEB887 }); // BurlyWood
+      const base = new THREE.Mesh(new THREE.BoxGeometry(5, 4, 6), baseMat);
+      base.position.y = 2;
+      house.add(base);
+  
+      const roofMat = new THREE.MeshLambertMaterial({ color: 0x8B4513 }); // SaddleBrown
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(4, 2, 4), roofMat);
+      roof.position.y = 4 + 1;
+      roof.rotation.y = Math.PI / 4;
+      house.add(roof);
+      return house;
+    };
+  
+    // Modern style house
+    const createModernHouse = () => {
+      const house = new THREE.Group();
+      const mainMat = new THREE.MeshLambertMaterial({ color: 0xD3D3D3 }); // LightGray
+      const mainBlock = new THREE.Mesh(new THREE.BoxGeometry(7, 5, 5), mainMat);
+      mainBlock.position.y = 2.5;
+      house.add(mainBlock);
+  
+      const accentMat = new THREE.MeshLambertMaterial({ color: 0x696969 }); // DimGray
+      const accentBlock = new THREE.Mesh(new THREE.BoxGeometry(3, 6, 4), accentMat);
+      accentBlock.position.set(-2, 3, 1);
+      house.add(accentBlock);
+  
+      const windowMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
+      const window = new THREE.Mesh(new THREE.PlaneGeometry(5, 2), windowMat);
+      window.position.set(1.5, 3, 2.51);
+      house.add(window);
+  
+      return house;
+    };
+  
+    for (let i = 0; i < 8; i++) {
+      const isModern = Math.random() > 0.5;
+      const house = isModern ? createModernHouse() : createOldHouse();
+      const onLeftSide = Math.random() > 0.5;
+      
+      house.position.x = onLeftSide ? -15 : 15;
+      house.position.z = -20 - i * 55 - Math.random() * 20;
+      house.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
+      
+      houses.add(house);
+    }
+  
+    return houses;
+  }
+  
 
 // Create scenery
 export function createScenery(): THREE.Group {
@@ -97,7 +157,7 @@ export function createScenery(): THREE.Group {
 
   // Ground
   const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 }); // ForestGreen
-  const groundGeometry = new THREE.PlaneGeometry(500, 400);
+  const groundGeometry = new THREE.PlaneGeometry(500, 500);
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.01;
@@ -112,23 +172,12 @@ export function createScenery(): THREE.Group {
     hill.position.set(
       (Math.random() - 0.5) * 400,
       14,
-      -150 - Math.random() * 100
+      -200 - Math.random() * 150
     );
     scenery.add(hill);
   }
 
-  // Roadside shops
-  const shopMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 }); // SaddleBrown
-  const shopGeometry = new THREE.BoxGeometry(6, 4, 4);
-  for (let i = 0; i < 5; i++) {
-    const shop = new THREE.Mesh(shopGeometry, shopMaterial);
-    shop.position.set(
-      Math.random() > 0.5 ? 10 : -10,
-      2,
-      -50 - i * 60 - Math.random() * 20
-    );
-    scenery.add(shop);
-  }
+  scenery.add(createHouses());
 
   return scenery;
 }
@@ -139,11 +188,11 @@ export function createStudents(): THREE.Mesh[] {
   const studentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
   const students: THREE.Mesh[] = [];
 
-  const busStops = [-50, -150, -250, -350];
+  const busStops = [-50, -150, -250, -350, -450];
   busStops.forEach(zPos => {
-    for(let i=0; i<3; i++) {
+    for(let i=0; i<2; i++) {
       const student = new THREE.Mesh(studentGeometry, studentMaterial);
-      student.position.set(7 + Math.random(), 0.75, zPos + (Math.random()-0.5)*5);
+      student.position.set(10 + Math.random(), 0.75, zPos + (Math.random()-0.5)*5);
       student.name = `student_stop_${zPos}`;
       students.push(student);
     }
@@ -158,30 +207,30 @@ export function createObstacles(): THREE.Mesh[] {
     // Cars
     const carMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
     const carGeometry = new THREE.BoxGeometry(2, 1, 4);
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 4; i++) {
       const car = new THREE.Mesh(carGeometry, carMaterial);
       car.name = 'car';
-      car.position.set(-3, 0.5, -70 - i * 100);
+      car.position.set(Math.random() > 0.5 ? -4.5: -1.5, 0.5, -70 - i * 100);
       obstacles.push(car);
     }
 
     // Bikes
     const bikeMaterial = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
     const bikeGeometry = new THREE.BoxGeometry(0.5, 0.8, 1.5);
-     for (let i = 0; i < 3; i++) {
+     for (let i = 0; i < 4; i++) {
       const bike = new THREE.Mesh(bikeGeometry, bikeMaterial);
       bike.name = 'bike';
-      bike.position.set(3, 0.4, -40 - i * 120);
+      bike.position.set(Math.random() > 0.5 ? 4.5 : 1.5, 0.4, -40 - i * 120);
       obstacles.push(bike);
     }
   
     // Cows
     const cowMaterial = new THREE.MeshLambertMaterial({ color: 0x964B00 });
     const cowGeometry = new THREE.BoxGeometry(1.5, 1, 2.5);
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) {
       const cow = new THREE.Mesh(cowGeometry, cowMaterial);
       cow.name = 'cow';
-      cow.position.set((Math.random()-0.5)*10, 0.5, -100 - i * 150);
+      cow.position.set((Math.random()-0.5)*16, 0.5, -100 - i * 150);
       obstacles.push(cow);
     }
   
@@ -232,4 +281,18 @@ export function createSchool(): THREE.Group {
 
     school.add(gate);
     return school;
+}
+
+export function createZebraCross(): THREE.Group {
+    const zebraCross = new THREE.Group();
+    const stripeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const stripeGeometry = new THREE.BoxGeometry(1.5, 0.02, 18);
+    for (let i = 0; i < 7; i++) {
+        const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
+        stripe.rotation.y = Math.PI / 2;
+        stripe.position.z = -100 + i * 1.5;
+        zebraCross.add(stripe);
+    }
+    zebraCross.position.z = -250;
+    return zebraCross;
 }

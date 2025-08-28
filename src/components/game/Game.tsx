@@ -6,7 +6,7 @@ import { Dashboard } from "./Dashboard";
 import { ControlsGuide } from "./ControlsGuide";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -67,7 +67,7 @@ export default function Game() {
     // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xF2F0E1);
-    scene.fog = new THREE.Fog(0xF2F0E1, 100, 300);
+    scene.fog = new THREE.Fog(0xF2F0E1, 150, 400);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 5, 10);
@@ -90,6 +90,7 @@ export default function Game() {
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
+    scene.add(createZebraCross());
     scene.add(createScenery());
     scene.add(createSchool());
     
@@ -126,8 +127,8 @@ export default function Game() {
       if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
       
       // Keep bus on road
-      bus.position.x = Math.max(-4, Math.min(4, bus.position.x));
-      bus.position.z = Math.max(-390, Math.min(20, bus.position.z));
+      bus.position.x = Math.max(-8, Math.min(8, bus.position.x));
+      bus.position.z = Math.max(-490, Math.min(20, bus.position.z));
       
       // Camera follow
       const offset = new THREE.Vector3(0, 7, 12);
@@ -141,7 +142,7 @@ export default function Game() {
       obstacles.forEach((obstacle, i) => {
         if (obstacle.name === 'car' || obstacle.name === 'bike') {
             obstacle.position.z += delta * (obstacle.name === 'car' ? 20 : 30);
-            if (obstacle.position.z > 20) obstacle.position.z = -390;
+            if (obstacle.position.z > 20) obstacle.position.z = -490;
         }
         
         obstacleBoxes[i].setFromObject(obstacle);
