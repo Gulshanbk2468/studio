@@ -77,7 +77,7 @@ export default function Game() {
 
     // Scene setup
     const scene = new THREE.Scene();
-    const sunriseColor = 0xFFDAB9; // PeachPuff
+    const sunriseColor = 0x87CEEB; // Light sky blue for daytime
     scene.background = new THREE.Color(sunriseColor);
     scene.fog = new THREE.Fog(sunriseColor, 150, 400);
 
@@ -87,13 +87,16 @@ export default function Game() {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows
     mount.appendChild(renderer.domElement);
 
     // Lighting
-    scene.add(new THREE.AmbientLight(0xFFE4B5, 1.2)); // Moccasin
-    const dirLight = new THREE.DirectionalLight(0xFF8C00, 2); // DarkOrange
+    scene.add(new THREE.AmbientLight(0xFFFFFF, 1.5)); // Brighter ambient light
+    const dirLight = new THREE.DirectionalLight(0xFFFFFF, 2.5); // Natural sun light
     dirLight.position.set(100, 100, 50);
     dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
     scene.add(dirLight);
 
     // Game elements
@@ -157,13 +160,13 @@ export default function Game() {
 
       // Obstacle logic
       obstacles.forEach((obstacle, i) => {
-        if (obstacle.userData.type === 'car' || obstacle.userData.type === 'bike' || obstacle.userData.type === 'truck') {
+        if (obstacle.userData.type && ['car', 'bike', 'truck', 'bicycle'].includes(obstacle.userData.type)) {
             obstacle.position.z += delta * obstacle.userData.speed;
             if (obstacle.position.z > 20) {
               obstacle.position.z = -490;
               // Vary speed and lane on reset
-              obstacle.userData.speed = 15 + Math.random() * 20;
-              obstacle.position.x = (Math.random() > 0.5 ? 1 : -1) * (obstacle.userData.type === 'bike' ? 10 : 6);
+              obstacle.userData.speed = 10 + Math.random() * 20;
+              obstacle.position.x = (Math.random() > 0.5 ? 1 : -1) * (obstacle.userData.type === 'bike' || obstacle.userData.type === 'bicycle' ? 10 : 6);
             }
         }
         
@@ -260,11 +263,11 @@ export default function Game() {
                             className="object-cover w-full h-full"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                    </CardHeader>
-                    <div className="flex flex-col justify-center p-8 bg-card">
-                        <CardTitle className="text-4xl font-bold font-headline mb-4 text-primary">
+                         <CardTitle className="absolute bottom-0 left-0 p-6 text-3xl font-bold text-white font-headline">
                             Shree Ambika Secondary School
                         </CardTitle>
+                    </CardHeader>
+                    <div className="flex flex-col justify-center p-8 bg-card">
                         <CardDescription className="text-lg text-muted-foreground mb-8">
                             Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!
                         </CardDescription>
