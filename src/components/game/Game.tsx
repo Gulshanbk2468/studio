@@ -100,9 +100,10 @@ export default function Game() {
     // Game elements
     const bus = createBus();
     scene.add(bus);
+    
     const schoolPos = new THREE.Vector3(12 + 190 - 10, 0, -50);
-    bus.position.set(schoolPos.x, 0, schoolPos.z);
-    bus.rotation.y = -Math.PI/2;
+    bus.position.set(schoolPos.x, 0.5, schoolPos.z);
+    bus.rotation.y = -Math.PI / 2;
 
 
     scene.add(createRoad());
@@ -137,19 +138,36 @@ export default function Game() {
     let animationFrameId: number;
     const clock = new THREE.Clock();
 
+    let moveSpeed = 0;
+    const acceleration = 0.5;
+    const deceleration = 0.95;
+    const maxSpeed = 15.0;
+
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
       const delta = clock.getDelta();
       const time = clock.getElapsedTime();
 
       if (gameState === "playing") {
-        const moveSpeed = 15.0 * delta;
         const turnSpeed = 0.8 * delta;
 
-        if (keysPressed['arrowup']) bus.translateZ(-moveSpeed);
-        if (keysPressed['arrowdown']) bus.translateZ(moveSpeed);
-        if (keysPressed['arrowleft']) bus.rotation.y += turnSpeed;
-        if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
+        if (keysPressed['arrowup']) {
+          moveSpeed += acceleration * delta;
+          moveSpeed = Math.min(moveSpeed, maxSpeed * delta);
+        } else if (keysPressed['arrowdown']) {
+          moveSpeed -= acceleration * delta;
+          moveSpeed = Math.max(moveSpeed, -maxSpeed * delta * 0.5);
+        } else {
+            moveSpeed *= deceleration;
+        }
+
+        bus.translateZ(-moveSpeed);
+        
+        // Prevent turning when not moving
+        if(Math.abs(moveSpeed) > 0.01) {
+            if (keysPressed['arrowleft']) bus.rotation.y += turnSpeed;
+            if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
+        }
         
         // Keep bus on road
         if (bus.position.z > -510 && bus.position.z < 10) { // On main highway
@@ -202,8 +220,8 @@ export default function Game() {
       if (gameState === "playing") {
         studentZones.forEach((zone, i) => {
           if (studentsRef.current[i].visible && busBox.intersectsBox(zone)) {
-            const busSpeed = Math.abs(keysPressed['arrowup'] ? moveSpeed : 0);
-            if (busSpeed < 0.1) {
+            const currentBusSpeed = Math.abs(moveSpeed / delta);
+            if (currentBusSpeed < 1.0) {
               studentsRef.current[i].visible = false;
               setScore(s => s + 10);
               const newStudentsCollected = studentsCollected + 1;
@@ -291,3 +309,5 @@ export default function Game() {
     </div>
   );
 }
+
+    
