@@ -330,7 +330,8 @@ export function createTrees(): THREE.Group {
       tree.position.x = onLeftSide ? -18 - Math.random() * 40 : 18 + Math.random() * 40;
       tree.position.z = -i * 8 - Math.random() * 8;
 
-      if(tree.position.x > -15 && tree.position.x < 15) continue; // Avoid trees on the road
+      if(tree.position.x > 12 && tree.position.x < 12 + 200 && tree.position.z > -60 && tree.position.z < -40) continue; // No trees on school road
+      if(tree.position.x > -15 && tree.position.x < 15) continue; // Avoid trees on the main road
 
       trees.add(tree);
     }
@@ -412,7 +413,7 @@ export function createStudents(): THREE.Mesh[] {
   const studentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
   const students: THREE.Mesh[] = [];
 
-  const busStops = [-50, -150, -250, -350, -450];
+  const busStops = [-80, -150, -250, -350, -450];
   busStops.forEach(zPos => {
     for(let i=0; i<2; i++) {
       const student = new THREE.Mesh(studentGeometry, studentMaterial);
