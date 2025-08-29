@@ -302,8 +302,8 @@ export function createTrees(): THREE.Group {
       tree.add(leaves);
   
       const onLeftSide = Math.random() > 0.5;
-      tree.position.x = onLeftSide ? -18 - Math.random() * 5 : 18 + Math.random() * 5;
-      tree.position.z = -i * 12 - Math.random() * 5;
+      tree.position.x = onLeftSide ? -18 - Math.random() * 20 : 18 + Math.random() * 20;
+      tree.position.z = -i * 12 - Math.random() * 10;
       trees.add(tree);
     }
     return trees;
@@ -311,7 +311,7 @@ export function createTrees(): THREE.Group {
 
 export function createShops(): THREE.Group {
     const shops = new THREE.Group();
-    const shopNames = ['Kirana Store', 'Bakery', 'Electronics', 'Cafe'];
+    const shopNames = ['Kirana Store', 'Bakery', 'Electronics', 'Cafe', 'Pustak Pasal', 'Chatpate Center'];
   
     const createShop = (name: string) => {
         const shop = new THREE.Group();
@@ -348,11 +348,11 @@ export function createShops(): THREE.Group {
         return shop;
     }
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < shopNames.length; i++) {
         const shop = createShop(shopNames[i]);
         const onLeftSide = Math.random() > 0.5;
         shop.position.x = onLeftSide ? -25 : 25;
-        shop.position.z = -50 - i * 100 - Math.random() * 20;
+        shop.position.z = -50 - i * 80 - Math.random() * 20;
         shop.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
         shops.add(shop);
     }
@@ -364,7 +364,7 @@ export function createShops(): THREE.Group {
 export function createScenery(): THREE.Group {
   const scenery = new THREE.Group();
 
-  // Ground
+  // Ground with Terraced Fields
   const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 }); // ForestGreen
   const groundGeometry = new THREE.PlaneGeometry(500, 500);
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -372,6 +372,18 @@ export function createScenery(): THREE.Group {
   ground.position.y = -0.01;
   ground.position.z = -200;
   scenery.add(ground);
+
+  // Terraced Fields
+  const terraceMat = new THREE.MeshLambertMaterial({ color: 0x3CB371 }); // MediumSeaGreen
+  for(let i = 0; i < 10; i++) {
+      const terraceGeo = new THREE.BoxGeometry(80 + Math.random()*40, 0.5, 20 + Math.random()*10);
+      const terrace = new THREE.Mesh(terraceGeo, terraceMat);
+      const onLeftSide = Math.random() > 0.5;
+      terrace.position.x = onLeftSide ? -60 - Math.random()*20 : 60 + Math.random()*20;
+      terrace.position.y = i * 0.2;
+      terrace.position.z = -i * 50 - Math.random() * 20;
+      scenery.add(terrace);
+  }
 
   scenery.add(createHouses());
 
@@ -655,4 +667,5 @@ export function createZebraCross(): THREE.Group {
     
 
     
+
 
