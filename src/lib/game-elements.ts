@@ -1,3 +1,4 @@
+
 import * as THREE from 'three';
 
 // Create the school bus
@@ -169,51 +170,107 @@ export function createRoadMarkings(): THREE.Group {
 function createHouses(): THREE.Group {
     const houses = new THREE.Group();
   
-    // Old style house
-    const createOldHouse = () => {
+    // Traditional Nepali House
+    const createOldNepaliHouse = () => {
       const house = new THREE.Group();
-      const baseMat = new THREE.MeshLambertMaterial({ color: 0xDEB887 }); // BurlyWood
-      const base = new THREE.Mesh(new THREE.BoxGeometry(5, 4, 6), baseMat);
+      const brickMat = new THREE.MeshLambertMaterial({ color: 0x945E3D }); // Darker brown
+      const woodMat = new THREE.MeshLambertMaterial({ color: 0x5C3D2E });
+      const roofMat = new THREE.MeshLambertMaterial({ color: 0x7B6C61 }); // Slate gray
+      
+      const base = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 7), brickMat);
       base.position.y = 2;
       house.add(base);
-  
-      const roofMat = new THREE.MeshLambertMaterial({ color: 0x8B4513 }); // SaddleBrown
-      const roof = new THREE.Mesh(new THREE.ConeGeometry(4, 2, 4), roofMat);
-      roof.position.y = 4 + 1;
-      roof.rotation.y = Math.PI / 4;
+
+      // Pitched Roof
+      const roofGeo = new THREE.BufferGeometry();
+      const vertices = new Float32Array([
+        -3.5, 4, 4,   3.5, 4, 4,   3.5, 6, 0,
+        -3.5, 4, 4,  -3.5, 6, 0,   3.5, 6, 0,
+        -3.5, 4, -4,  -3.5, 6, 0,  -3.5, 4, 4,
+         3.5, 4, -4,   3.5, 4, 4,   3.5, 6, 0,
+        -3.5, 4, -4,   3.5, 4, -4,  3.5, 6, 0,
+        -3.5, 4, -4,   3.5, 6, 0,  -3.5, 6, 0,
+      ]);
+      roofGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+      roofGeo.computeVertexNormals();
+      const roof = new THREE.Mesh(roofGeo, roofMat);
+      roof.position.y = 0;
       house.add(roof);
+
+      // Wooden beams/windows
+      const windowGeo = new THREE.BoxGeometry(1.5, 1, 0.2);
+      const window1 = new THREE.Mesh(windowGeo, woodMat);
+      window1.position.set(-1.5, 2.5, 3.51);
+      house.add(window1);
+      const window2 = window1.clone();
+      window2.position.x = 1.5;
+      house.add(window2);
+
       return house;
     };
   
-    // Modern style house
+    // Modern style house with clean lines
     const createModernHouse = () => {
       const house = new THREE.Group();
-      const mainMat = new THREE.MeshLambertMaterial({ color: 0xD3D3D3 }); // LightGray
+      const mainMat = new THREE.MeshLambertMaterial({ color: 0xE0E0E0 }); // LightGray
+      const accentMat = new THREE.MeshLambertMaterial({ color: 0x757575 }); // MidGray
+      
       const mainBlock = new THREE.Mesh(new THREE.BoxGeometry(7, 5, 5), mainMat);
       mainBlock.position.y = 2.5;
       house.add(mainBlock);
   
-      const accentMat = new THREE.MeshLambertMaterial({ color: 0x696969 }); // DimGray
       const accentBlock = new THREE.Mesh(new THREE.BoxGeometry(3, 6, 4), accentMat);
-      accentBlock.position.set(-2, 3, 1);
+      accentBlock.position.set(-2.5, 3, 1.5);
       house.add(accentBlock);
   
-      const windowMat = new THREE.MeshLambertMaterial({ color: 0x000000 });
+      const windowMat = new THREE.MeshLambertMaterial({ color: 0x222222, transparent: true, opacity: 0.6 });
       const window = new THREE.Mesh(new THREE.PlaneGeometry(5, 2), windowMat);
       window.position.set(1.5, 3, 2.51);
       house.add(window);
   
       return house;
     };
+
+    // Big building with glass
+    const createGlassBuilding = () => {
+        const building = new THREE.Group();
+        const frameMat = new THREE.MeshLambertMaterial({ color: 0xACACAC });
+        const glassMat = new THREE.MeshLambertMaterial({ color: 0x6495ED, transparent: true, opacity: 0.4 });
+
+        const floors = 5;
+        const floorHeight = 4;
+
+        for (let i = 0; i < floors; i++) {
+            // Frame
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(10, floorHeight, 8), frameMat);
+            frame.position.y = i * floorHeight + floorHeight/2;
+            building.add(frame);
+            // Glass panels
+            const glassWall = new THREE.Mesh(new THREE.PlaneGeometry(9, floorHeight - 0.5), glassMat);
+            glassWall.position.y = frame.position.y;
+            glassWall.position.z = 4.01;
+            building.add(glassWall);
+
+            const glassWallSide = new THREE.Mesh(new THREE.PlaneGeometry(7, floorHeight - 0.5), glassMat);
+            glassWallSide.position.y = frame.position.y;
+            glassWallSide.position.x = -5.01;
+            glassWallSide.rotation.y = Math.PI / 2;
+            building.add(glassWallSide);
+        }
+        return building;
+    }
   
+    const houseTypes = [createOldNepaliHouse, createModernHouse, createGlassBuilding];
+
     for (let i = 0; i < 40; i++) {
-      const isModern = Math.random() > 0.5;
-      const house = isModern ? createModernHouse() : createOldHouse();
+      const randomTypeIndex = Math.floor(Math.random() * houseTypes.length);
+      const house = houseTypes[randomTypeIndex]();
+      
       const onLeftSide = Math.random() > 0.5;
       
-      house.position.x = onLeftSide ? -25 - Math.random() * 10 : 25 + Math.random() * 10;
-      house.position.z = -i * 12 - Math.random() * 5;
-      house.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
+      house.position.x = onLeftSide ? -25 - Math.random() * 15 : 25 + Math.random() * 15;
+      house.position.z = -i * 12 - 20 - Math.random() * 5;
+      house.rotation.y = onLeftSide ? Math.PI / 2 + (Math.random()-0.5) * 0.2 : -Math.PI / 2 + (Math.random()-0.5) * 0.2;
       
       houses.add(house);
     }
@@ -278,7 +335,7 @@ export function createShops(): THREE.Group {
         const texture = new THREE.CanvasTexture(canvas);
         const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
         const sign = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), signMaterial);
-        sign.position.set(0, 3.5, 3.01);
+        sign.position.set(0, 5.5, 3.01);
         shop.add(sign);
     
         return shop;
@@ -349,10 +406,10 @@ export function createMountains(): THREE.Group {
     };
   
     const mountainRanges = [
-      { size: 100, height: 80, x: -150, z: -350 },
+      { size: 100, height: 80, x: -250, z: -350 },
       { size: 150, height: 120, x: 50, z: -400 },
       { size: 80, height: 60, x: 200, z: -300 },
-      { size: 120, height: 100, x: -250, z: -250 },
+      { size: 120, height: 100, x: -350, z: -250 },
     ];
   
     mountainRanges.forEach(range => {
@@ -558,4 +615,6 @@ export function createZebraCross(): THREE.Group {
     zebraCross.position.z = -450;
     return zebraCross;
 }
+    
+
     
