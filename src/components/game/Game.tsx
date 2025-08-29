@@ -166,7 +166,7 @@ export default function Game() {
             bus.rotation.y += turnDirection * turnSpeed * delta * (moveSpeed > 0 ? 1 : -1);
         }
         
-        bus.translateZ(moveSpeed * delta);
+        bus.translateZ(-moveSpeed * delta);
 
         const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 35;
         const SCHOOL_COMPOUND_X_MIN = 12;
@@ -323,3 +323,5 @@ export default function Game() {
     </div>
   );
 }
+
+    
