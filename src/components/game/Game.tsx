@@ -71,8 +71,6 @@ export default function Game() {
   }, [infractionCount]);
 
   React.useEffect(() => {
-    if (gameState !== "playing") return;
-
     const mount = mountRef.current;
     if (!mount) return;
 
@@ -83,7 +81,6 @@ export default function Game() {
     scene.fog = new THREE.Fog(sunriseColor, 150, 400);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 5, 10);
     
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -114,7 +111,7 @@ export default function Game() {
     scene.add(createShops());
     scene.add(createSchool());
     
-    const zebraCrossings = [createZebraCross(-150), createZebraCross(-350)];
+    const zebraCrossings = [createZebraCross(-150), createZebraCross(-350), createZebraCross(-50)];
     zebraCrossings.forEach(z => scene.add(z));
     
     const initialStudents = createStudents();
@@ -137,28 +134,35 @@ export default function Game() {
 
     let animationFrameId: number;
     const clock = new THREE.Clock();
-    let missionAccomplished = false;
 
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
       const delta = clock.getDelta();
-      const moveSpeed = 15.0 * delta;
-      const turnSpeed = 0.8 * delta;
+      const time = clock.getElapsedTime();
 
-      if (keysPressed['arrowup']) bus.translateZ(-moveSpeed);
-      if (keysPressed['arrowdown']) bus.translateZ(moveSpeed);
-      if (keysPressed['arrowleft']) bus.rotation.y += turnSpeed;
-      if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
-      
-      // Keep bus on road
-      bus.position.x = Math.max(-12, Math.min(30, bus.position.x));
-      bus.position.z = Math.max(-490, Math.min(20, bus.position.z));
-      
-      // Camera follow
-      const offset = new THREE.Vector3(0, 7, 12);
-      offset.applyQuaternion(bus.quaternion);
-      camera.position.lerp(bus.position.clone().add(offset), 0.1);
-      camera.lookAt(bus.position);
+      if (gameState === "playing") {
+        const moveSpeed = 15.0 * delta;
+        const turnSpeed = 0.8 * delta;
+
+        if (keysPressed['arrowup']) bus.translateZ(-moveSpeed);
+        if (keysPressed['arrowdown']) bus.translateZ(moveSpeed);
+        if (keysPressed['arrowleft']) bus.rotation.y += turnSpeed;
+        if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
+        
+        // Keep bus on road
+        bus.position.x = Math.max(-12, Math.min(30, bus.position.x));
+        bus.position.z = Math.max(-490, Math.min(20, bus.position.z));
+        
+        // Camera follow
+        const offset = new THREE.Vector3(0, 7, 12);
+        offset.applyQuaternion(bus.quaternion);
+        camera.position.lerp(bus.position.clone().add(offset), 0.1);
+        camera.lookAt(bus.position);
+      } else { // Menu animation
+        camera.position.set(10 + Math.sin(time * 0.2) * 5, 5, 25 + Math.cos(time * 0.2) * 5);
+        camera.lookAt(bus.position);
+      }
+
 
       busBox.setFromObject(bus);
 
@@ -175,37 +179,41 @@ export default function Game() {
             }
         }
         
-        obstacleBoxes[i].setFromObject(obstacle);
-        if (busBox.intersectsBox(obstacleBoxes[i])) {
-            handleInfraction(obstacle.name);
-            obstacle.position.z += 20 * (obstacle.userData.direction === 1 ? -1 : 1); // Move away to prevent multiple hits
-        }
-      });
-
-      // Student pickup logic
-      studentZones.forEach((zone, i) => {
-        if (studentsRef.current[i].visible && busBox.intersectsBox(zone)) {
-          const busSpeed = Math.abs(keysPressed['arrowup'] ? moveSpeed : 0);
-          if (busSpeed < 0.1) {
-            studentsRef.current[i].visible = false;
-            setScore(s => s + 10);
-            const newStudentsCollected = studentsCollected + 1;
-            setStudentsCollected(c => c + 1);
-            addLog(`Picked up student.`);
-            if(newStudentsCollected === totalStudents){
-                addLog("All students collected! Return to school.");
-                setCoachMessage("All students collected! Return to school.");
-            }
+        if (gameState === "playing") {
+          obstacleBoxes[i].setFromObject(obstacle);
+          if (busBox.intersectsBox(obstacleBoxes[i])) {
+              handleInfraction(obstacle.name);
+              obstacle.position.z += 20 * (obstacle.userData.direction === 1 ? -1 : 1); // Move away to prevent multiple hits
           }
         }
       });
 
-      // Finish condition
-      if(!missionAccomplished && studentsCollected === totalStudents && bus.position.z > -5 && bus.position.z < 20 && bus.position.x > 15) {
-        missionAccomplished = true;
-        addLog("Mission Accomplished! You can continue driving.");
-        setCoachMessage("Mission Accomplished! You can continue driving.");
+      // Student pickup logic
+      if (gameState === "playing") {
+        studentZones.forEach((zone, i) => {
+          if (studentsRef.current[i].visible && busBox.intersectsBox(zone)) {
+            const busSpeed = Math.abs(keysPressed['arrowup'] ? moveSpeed : 0);
+            if (busSpeed < 0.1) {
+              studentsRef.current[i].visible = false;
+              setScore(s => s + 10);
+              const newStudentsCollected = studentsCollected + 1;
+              setStudentsCollected(c => c + 1);
+              addLog(`Picked up student.`);
+              if(newStudentsCollected === totalStudents){
+                  addLog("All students collected! Return to school.");
+                  setCoachMessage("All students collected! Return to school.");
+              }
+            }
+          }
+        });
+
+        // Finish condition
+        if(studentsCollected === totalStudents && bus.position.z > -5 && bus.position.z < 20 && bus.position.x > 15) {
+          addLog("Mission Accomplished! You can continue driving.");
+          setCoachMessage("Mission Accomplished! You can continue driving.");
+        }
       }
+
 
       renderer.render(scene, camera);
     }
@@ -228,7 +236,7 @@ export default function Game() {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [gameState]);
+  }, []);
 
   const startGame = () => {
     setScore(0);
@@ -240,13 +248,10 @@ export default function Game() {
     addLog("Game started. Pick up all students and return to school.");
   };
 
-  const restartGame = () => {
-    setGameState("menu");
-  }
-
   return (
     <div className="relative h-screen w-screen">
-      {gameState === 'playing' && (
+       <div ref={mountRef} className="absolute inset-0 z-0" />
+      {gameState === 'playing' ? (
         <>
           <header className="absolute top-0 left-0 right-0 z-20 flex justify-center p-4">
             <h1 className="text-2xl md:text-4xl font-bold font-headline text-center bg-primary/80 text-primary-foreground py-2 px-6 rounded-lg shadow-lg backdrop-blur-sm whitespace-nowrap">
@@ -255,43 +260,24 @@ export default function Game() {
           </header>
           <ControlsGuide />
         </>
-      )}
-
-      {gameState === 'menu' && (
+      ) : (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/50 animate-fade-in">
-             <div className="w-full max-w-4xl mx-auto">
-                <Card className="overflow-hidden shadow-2xl border-4 border-primary/50">
-                    <div className="relative">
-                        <Image 
-                            src="https://picsum.photos/seed/school/1200/600"
-                            width={1200}
-                            height={600}
-                            alt="Shree Ambika Secondary School"
-                            data-ai-hint="school building"
-                            className="object-cover w-full h-96"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
-                            <h1 className="text-4xl font-bold text-white font-headline whitespace-nowrap">
-                                Shree Ambika Secondary School
-                            </h1>
-                        </div>
-                    </div>
-                    <div className="flex flex-col justify-center p-8 bg-card">
-                        <CardDescription className="text-lg text-muted-foreground mb-8 text-center">
-                            Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!
-                        </CardDescription>
-                        <CardContent className="p-0 flex flex-col gap-4">
-                             <Button onClick={startGame} size="lg" className="w-full text-lg py-6">
-                                Start Driving
-                            </Button>
-                        </CardContent>
-                    </div>
-                </Card>
+             <div className="w-full max-w-4xl mx-auto text-center">
+                <h1 className="text-5xl md:text-7xl font-bold text-white font-headline drop-shadow-lg mb-4">
+                  Hemja Highway Hero
+                </h1>
+                <h2 className="text-2xl md:text-3xl font-semibold text-primary-foreground bg-primary/80 rounded-md py-2 px-4 inline-block mb-8">
+                  Shree Ambika Secondary School Edition
+                </h2>
+                <p className="text-lg text-white max-w-2xl mx-auto mb-8 drop-shadow-md">
+                    Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!
+                </p>
+                <Button onClick={startGame} size="lg" className="w-auto text-xl py-8 px-10">
+                    Start Driving
+                </Button>
             </div>
         </div>
       )}
-
-      <div ref={mountRef} className="h-full w-full" />
     </div>
   );
 }
