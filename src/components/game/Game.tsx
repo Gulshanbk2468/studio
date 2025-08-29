@@ -76,9 +76,8 @@ export default function Game() {
 
     // Scene setup
     const scene = new THREE.Scene();
-    const sunriseColor = 0x87CEEB; // Light sky blue for daytime
-    scene.background = new THREE.Color(sunriseColor);
-    scene.fog = new THREE.Fog(sunriseColor, 150, 600);
+    scene.background = new THREE.Color(0x87CEEB); // Light sky blue for daytime
+    scene.fog = new THREE.Fog(0x87CEEB, 150, 600);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     
@@ -101,10 +100,8 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    const schoolPos = new THREE.Vector3(12 + 190, 0, -50);
-    bus.position.set(schoolPos.x, 0.5, schoolPos.z + 15); // Start inside school compound
+    bus.position.set(12 + 190, 0.5, -50 + 15);
     bus.rotation.y = Math.PI;
-
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
@@ -166,12 +163,6 @@ export default function Game() {
         
         bus.translateZ(moveSpeed * delta);
 
-
-        const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 35;
-        const SCHOOL_COMPOUND_X_MIN = 12;
-        const SCHOOL_COMPOUND_Z_MAX = 10;
-        const SCHOOL_COMPOUND_Z_MIN = -110;
-        
         const MAIN_HIGHWAY_X_MAX = 12;
         const MAIN_HIGHWAY_X_MIN = -12;
         const MAIN_HIGHWAY_Z_MAX = 10;
@@ -182,18 +173,35 @@ export default function Game() {
         const SUB_ROAD_Z_MAX = -45;
         const SUB_ROAD_Z_MIN = -55;
         
-        let onMainHighway = bus.position.z < MAIN_HIGHWAY_Z_MAX && bus.position.z > MAIN_HIGHWAY_Z_MIN && bus.position.x < SUB_ROAD_X_MIN + 5;
-        let onSubRoad = bus.position.x > SUB_ROAD_X_MIN - 5 && bus.position.z > SUB_ROAD_Z_MIN - 5 && bus.position.z < SUB_ROAD_Z_MAX + 5;
+        const SCHOOL_COMPOUND_X_MAX = 12 + 200 + 35;
+        const SCHOOL_COMPOUND_X_MIN = 12;
+        const SCHOOL_COMPOUND_Z_MAX = 10;
+        const SCHOOL_COMPOUND_Z_MIN = -110;
 
-        // Road boundary logic
-        if (onMainHighway) {
-            bus.position.x = Math.max(MAIN_HIGHWAY_X_MIN, Math.min(MAIN_HIGHWAY_X_MAX, bus.position.x));
-        } else if (onSubRoad) {
-             bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
-        } else { // In school compound
-            bus.position.x = Math.max(SCHOOL_COMPOUND_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX, bus.position.x));
-            bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
+        let inSchoolCompound = bus.position.x >= SCHOOL_COMPOUND_X_MIN && bus.position.x <= SCHOOL_COMPOUND_X_MAX &&
+                                bus.position.z >= SCHOOL_COMPOUND_Z_MIN && bus.position.z <= SCHOOL_COMPOUND_Z_MAX;
+
+        let onMainHighway = bus.position.x >= MAIN_HIGHWAY_X_MIN && bus.position.x <= MAIN_HIGHWAY_X_MAX &&
+                             bus.position.z >= MAIN_HIGHWAY_Z_MIN && bus.position.z <= MAIN_HIGHWAY_Z_MAX;
+        
+        let onSubRoad = bus.position.x >= SUB_ROAD_X_MIN && bus.position.x <= SUB_ROAD_X_MAX &&
+                         bus.position.z >= SUB_ROAD_Z_MIN && bus.position.z <= SUB_ROAD_Z_MAX;
+        
+        let inTransition = onSubRoad && bus.position.x > (12 + 200 - 20); // Near the school gate
+
+        if (!inTransition) {
+          if (onMainHighway) {
+              bus.position.x = Math.max(MAIN_HIGHWAY_X_MIN, Math.min(MAIN_HIGHWAY_X_MAX, bus.position.x));
+              bus.position.z = Math.max(MAIN_HIGHWAY_Z_MIN, Math.min(MAIN_HIGHWAY_Z_MAX, bus.position.z));
+          } else if (onSubRoad) {
+              bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
+              bus.position.z = Math.max(SUB_ROAD_Z_MIN, Math.min(SUB_ROAD_Z_MAX, bus.position.z));
+          } else if (inSchoolCompound) {
+              bus.position.x = Math.max(SCHOOL_COMPOUND_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX, bus.position.x));
+              bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
+          }
         }
+
 
         // Camera follow
         const offset = new THREE.Vector3(0, 7, -12); // Camera behind the bus
@@ -265,7 +273,7 @@ export default function Game() {
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(window.innerWidth / window.innerHeight);
     }
     window.addEventListener('resize', handleResize);
 
