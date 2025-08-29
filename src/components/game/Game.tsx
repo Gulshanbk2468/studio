@@ -152,21 +152,20 @@ export default function Game() {
       if (gameState === "playing") {
 
         if (keysPressed['arrowup']) {
-          moveSpeed += acceleration * delta;
+          moveSpeed -= acceleration * delta; // Forward
         } else if (keysPressed['arrowdown']) {
-          moveSpeed -= acceleration * delta;
+          moveSpeed += acceleration * delta; // Backward
         } else {
             moveSpeed *= deceleration;
         }
-        moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
+        moveSpeed = Math.max(-maxSpeed, Math.min(maxSpeed * 0.5, moveSpeed));
         
-        // Prevent turning when not moving
         if(Math.abs(moveSpeed) > 0.1) {
-            const turnAngle = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
-            bus.rotation.y += turnAngle * turnSpeedMultiplier * delta * (moveSpeed > 0 ? 1 : -1);
+            const turnAngle = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
+            bus.rotation.y += turnAngle * turnSpeedMultiplier * delta * (moveSpeed > 0 ? -1 : 1);
         }
         
-        bus.translateZ(moveSpeed * delta);
+        bus.translateZ(-moveSpeed * delta);
 
         const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 35;
         const SCHOOL_COMPOUND_X_MIN = 12;
@@ -178,7 +177,7 @@ export default function Game() {
         const MAIN_HIGHWAY_Z_MAX = 10;
         const MAIN_HIGHWAY_Z_MIN = -510;
 
-        const SUB_ROAD_X_MAX = 12 + 190;
+        const SUB_ROAD_X_MAX = 12 + 200;
         const SUB_ROAD_X_MIN = 12;
         const SUB_ROAD_Z_MAX = -45;
         const SUB_ROAD_Z_MIN = -55;

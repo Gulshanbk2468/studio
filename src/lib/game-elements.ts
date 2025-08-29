@@ -157,7 +157,7 @@ export function createRoad(): THREE.Group {
     roadGroup.add(mainRoad);
 
     // Sub-road to school - now perpendicular
-    const subRoadLength = 190;
+    const subRoadLength = 200;
     const subRoadGeometry = new THREE.PlaneGeometry(10, subRoadLength);
     const subRoad = new THREE.Mesh(subRoadGeometry, roadMaterial);
     subRoad.rotation.x = -Math.PI / 2;
@@ -289,8 +289,12 @@ function createHouses(): THREE.Group {
       const onLeftSide = Math.random() > 0.5;
       
       const zPos = -i * 12 - 20 - Math.random() * 5;
-      // Prevent houses near the sub-road intersection
-      if (zPos > -40 && zPos < -60) continue;
+      
+      // Prevent houses near the school road and its intersection
+      const inSchoolRoadXRange = house.position.x > 12;
+      const inSchoolRoadZRange = zPos > -60 && zPos < -40;
+      if (inSchoolRoadXRange && inSchoolRoadZRange) continue;
+
 
       house.position.x = onLeftSide ? -25 - Math.random() * 15 : 25 + Math.random() * 15;
       house.position.z = zPos;
@@ -416,18 +420,6 @@ export function createScenery(): THREE.Group {
   ground.position.y = -0.01;
   ground.position.z = 0;
   scenery.add(ground);
-
-  // Terraced Fields
-  const terraceMat = new THREE.MeshLambertMaterial({ color: 0x3CB371 }); // MediumSeaGreen
-  for(let i = 0; i < 20; i++) {
-      const terraceGeo = new THREE.BoxGeometry(120 + Math.random()*80, 0.5, 30 + Math.random()*15);
-      const terrace = new THREE.Mesh(terraceGeo, terraceMat);
-      const onLeftSide = Math.random() > 0.5;
-      terrace.position.x = onLeftSide ? -100 - Math.random()*40 : 100 + Math.random()*40;
-      terrace.position.y = i * 0.2;
-      terrace.position.z = -i * 50 - Math.random() * 20;
-      scenery.add(terrace);
-  }
 
   scenery.add(createHouses());
 
@@ -631,7 +623,7 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
 export function createSchool(): THREE.Group {
     const school = new THREE.Group();
     // Position the school at the end of the sub-road
-    school.position.x = 12 + 190;
+    school.position.x = 12 + 200;
     school.position.z = -50;
     school.rotation.y = -Math.PI / 2; // Rotate to face the sub-road
 
@@ -652,7 +644,7 @@ export function createSchool(): THREE.Group {
     school.add(backWall);
 
     // School Building (U-shape for more realism)
-    const buildingMat = new THREE.MeshStandardMaterial({color: 0xADD8E6, roughness: 0.8}); // Light Blue
+    const buildingMat = new THREE.MeshStandardMaterial({color: 0xFAEBD7, roughness: 0.8}); // AntiqueWhite
     const mainBuilding = new THREE.Mesh(new THREE.BoxGeometry(40, 15, 12), buildingMat);
     mainBuilding.position.set(0, 7.5, -55);
     school.add(mainBuilding);
@@ -666,25 +658,25 @@ export function createSchool(): THREE.Group {
     school.add(rightWing);
 
     // Windows
-    const windowFrameMat = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
+    const windowFrameMat = new THREE.MeshLambertMaterial({color: 0x8B4513}); // SaddleBrown
     const windowGlassMat = new THREE.MeshLambertMaterial({color: 0x87CEEB, transparent: true, opacity: 0.7});
-    const windowGeo = new THREE.BoxGeometry(2, 2.5, 0.3);
-    const glassGeo = new THREE.PlaneGeometry(1.8, 2.3);
+    const windowGeo = new THREE.BoxGeometry(2.5, 3, 0.3);
+    const glassGeo = new THREE.PlaneGeometry(2.3, 2.8);
 
     for(let j=0; j<3; j++) { // 3 floors
-        for(let i=0; i<7; i++){ // 7 windows on main building
+        for(let i=0; i<6; i++){ // 6 windows on main building
             const window = new THREE.Mesh(windowGeo, windowFrameMat);
             const glass = new THREE.Mesh(glassGeo, windowGlassMat);
-            window.position.set(-18 + i * 6, 4 + j * 5, -48.9);
+            window.position.set(-15 + i * 6, 4 + j * 5, -48.9);
             glass.position.set(window.position.x, window.position.y, window.position.z + 0.16);
             school.add(window, glass);
         }
-        for(let i=0; i<6; i++){ // 6 windows on each wing
+        for(let i=0; i<5; i++){ // 5 windows on each wing
             const windowL = new THREE.Mesh(windowGeo, windowFrameMat);
             const glassL = new THREE.Mesh(glassGeo, windowGlassMat);
             windowL.rotation.y = Math.PI / 2;
             glassL.rotation.y = Math.PI / 2;
-            windowL.position.set(-26.1, 4 + j * 5, -45 + i * 6);
+            windowL.position.set(-26.1, 4 + j * 5, -45 + i * 8);
             glassL.position.set(windowL.position.x + 0.16, windowL.position.y, windowL.position.z);
             school.add(windowL, glassL);
 
@@ -692,7 +684,7 @@ export function createSchool(): THREE.Group {
             const glassR = new THREE.Mesh(glassGeo, windowGlassMat);
             windowR.rotation.y = -Math.PI / 2;
             glassR.rotation.y = -Math.PI / 2;
-            windowR.position.set(26.1, 4 + j * 5, -45 + i * 6);
+            windowR.position.set(26.1, 4 + j * 5, -45 + i * 8);
             glassR.position.set(windowR.position.x - 0.16, windowR.position.y, windowR.position.z);
             school.add(windowR, glassR);
         }
@@ -700,7 +692,7 @@ export function createSchool(): THREE.Group {
     
     // Door
     const doorMat = new THREE.MeshLambertMaterial({color: 0x8B4513});
-    const door = new THREE.Mesh(new THREE.BoxGeometry(4, 6, 0.4), doorMat);
+    const door = new THREE.Mesh(new THREE.BoxGeometry(5, 6, 0.4), doorMat);
     door.position.set(0, 3, -48.8);
     school.add(door);
 
