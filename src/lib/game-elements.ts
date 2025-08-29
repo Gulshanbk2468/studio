@@ -1,4 +1,5 @@
 
+
 import * as THREE from 'three';
 
 // Create the school bus
@@ -9,7 +10,7 @@ export function createBus(): THREE.Group {
 
   const busYellow = new THREE.MeshStandardMaterial({ color: 0xE2A900, roughness: 0.3, metalness: 0.2 });
   const black = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 });
-  const glass = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.1, transparent: true, opacity: 0.6 });
+  const glass = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.6, reflectivity: 0.8 });
   const light = new THREE.MeshBasicMaterial({ color: 0xFFFF00 });
   const red = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
   const silver = new THREE.MeshStandardMaterial({color: 0xC0C0C0, roughness: 0.2, metalness: 0.8});
@@ -85,7 +86,7 @@ export function createBus(): THREE.Group {
     sideWindowL.rotation.y = Math.PI/2;
     bus.add(sideWindowL);
 
-    if (i !== 3) { // No door on the left side
+    if (i !== 2) { // Add door space on the right
       const sideWindowR = new THREE.Mesh(sideWindowGeo, glass);
       sideWindowR.position.set(1.41, windowYPos, windowZPos);
       sideWindowR.rotation.y = -Math.PI/2;
@@ -94,9 +95,9 @@ export function createBus(): THREE.Group {
   }
   
   // Door
-  const doorGeo = new THREE.PlaneGeometry(1, 1.8);
+  const doorGeo = new THREE.PlaneGeometry(1.8, 1.8);
   const door = new THREE.Mesh(doorGeo, glass);
-  door.position.set(1.41, 1.2, 3.5);
+  door.position.set(1.41, 1.2, 1.6);
   door.rotation.y = -Math.PI/2;
   bus.add(door);
   
@@ -113,7 +114,16 @@ export function createBus(): THREE.Group {
     wheel.position.set(pos.x, -0.5, pos.z);
     bus.add(wheel);
   });
-  
+
+  // Side Mirrors
+  const mirrorGeo = new THREE.BoxGeometry(0.1, 0.4, 0.3);
+  const mirrorL = new THREE.Mesh(mirrorGeo, silver);
+  mirrorL.position.set(-1.5, 2.0, 4.3);
+  bus.add(mirrorL);
+  const mirrorR = mirrorL.clone();
+  mirrorR.position.x = 1.5;
+  bus.add(mirrorR);
+
   // Add Text
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
@@ -364,12 +374,15 @@ export function createScenery(): THREE.Group {
   ground.position.z = 0;
   scenery.add(ground);
 
+  const allShops = createShops();
+  allShops.forEach(shop => scenery.add(shop));
+
   return scenery;
 }
 
 // Create students at bus stops
 export function createStudents(): THREE.Mesh[] {
-  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x4682B4 }); // SteelBlue - less bright
+  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x00008B }); // Dark Blue - more realistic
   const studentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
   const students: THREE.Mesh[] = [];
 
@@ -390,6 +403,7 @@ export function createStudents(): THREE.Mesh[] {
 // Create obstacles
 export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
     const obstacles: (THREE.Mesh | THREE.Group)[] = [];
+    const glass = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.1, metalness: 0.1, transparent: true, opacity: 0.6, reflectivity: 0.8 });
   
     const createCar = () => {
         const car = new THREE.Group();
@@ -400,7 +414,7 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         car.add(body);
         
         const cabinGeo = new THREE.BoxGeometry(1.8, 0.8, 2.5);
-        const cabin = new THREE.Mesh(cabinGeo, bodyMat);
+        const cabin = new THREE.Mesh(cabinGeo, glass);
         cabin.position.set(0, 1.2, -0.2);
         car.add(cabin);
 
@@ -440,6 +454,12 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         handle.position.set(0, 0.8, 0.6);
         bike.add(handle);
 
+        const riderMat = new THREE.MeshLambertMaterial({color: 0x990000});
+        const rider = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.8, 0.5), riderMat);
+        rider.name = 'rider';
+        rider.position.set(0, 0.9, 0);
+        bike.add(rider);
+
         bike.name = 'motorbike';
         bike.userData = { type: 'bike' };
         return bike;
@@ -458,6 +478,12 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         bar2.rotation.z = Math.PI / 1.5;
         bar2.position.set(0, 0.8, 0.3);
         bicycle.add(bar2);
+        
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), frameMat);
+        handle.name = 'handle';
+        handle.rotation.y = Math.PI/2;
+        handle.position.set(0, 1, 0.5);
+        bicycle.add(handle);
 
         const wheelGeo = new THREE.TorusGeometry(0.35, 0.02, 8, 32);
         const wheelMat = new THREE.MeshStandardMaterial({color: 0x333333, roughness: 0.8});
@@ -467,6 +493,12 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         const wheelB = wheelF.clone();
         wheelB.position.z = -0.7;
         bicycle.add(wheelB);
+        
+        const riderMat = new THREE.MeshLambertMaterial({color: 0x009900});
+        const rider = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.7, 0.4), riderMat);
+        rider.name = 'rider';
+        rider.position.set(0, 0.8, 0);
+        bicycle.add(rider);
 
         bicycle.name = 'bicycle';
         bicycle.userData = { type: 'bicycle' };
@@ -673,18 +705,20 @@ export function createSchool(): THREE.Group {
     
     const gateLeft = new THREE.Group();
     gateLeft.name = "gateLeft";
+    gateLeft.position.x = -10;
     for(let i=0; i < 12; i++){
         const bar = new THREE.Mesh(gateBarGeo, gateBarMat);
-        bar.position.set(-4.75, 0.6 + i*0.4, 0);
+        bar.position.set(4.75, 0.6 + i*0.4, 0);
         gateLeft.add(bar);
     }
     gateContainer.add(gateLeft);
     
     const gateRight = new THREE.Group();
     gateRight.name = "gateRight";
+    gateRight.position.x = 10;
     for(let i=0; i < 12; i++){
         const bar = new THREE.Mesh(gateBarGeo, gateBarMat);
-        bar.position.set(4.75, 0.6 + i*0.4, 0);
+        bar.position.set(-4.75, 0.6 + i*0.4, 0);
         gateRight.add(bar);
     }
     gateContainer.add(gateRight);
@@ -833,9 +867,12 @@ export function createRoadSigns(): THREE.Group {
 
     const ghattekholaSign = createSign('Ghattekhola', 'right');
     ghattekholaSign.position.set(15, 0, -100);
+    ghattekholaSign.rotation.y = Math.PI;
     signs.add(ghattekholaSign);
     
     return signs;
 }
+
+    
 
     

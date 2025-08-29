@@ -107,7 +107,6 @@ export default function Game() {
     scene.add(createRoadMarkings());
     scene.add(createScenery());
     scene.add(createTrees());
-    scene.add(createShops());
     
     const school = createSchool();
     scene.add(school);
@@ -163,11 +162,11 @@ export default function Game() {
 
 
         if(Math.abs(moveSpeed) > 0.1) {
-            const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
-            bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
+            const turnDirection = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
+            bus.rotation.y -= turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
-        bus.translateZ(-moveSpeed * delta);
+        bus.translateZ(moveSpeed * delta);
 
         const MAIN_HIGHWAY_X_MAX = 12;
         const MAIN_HIGHWAY_X_MIN = -12;
@@ -250,6 +249,21 @@ export default function Game() {
                 obstacle.position.z = 20;
             }
         }
+
+        // Animate two-wheelers
+        if (obstacle.userData.type === 'bike') {
+            const rider = obstacle.getObjectByName('rider');
+            if (rider) {
+                rider.position.y = 0.9 + Math.sin(time * 10) * 0.05; // Simple up-down bobbing
+            }
+        }
+        if (obstacle.userData.type === 'bicycle') {
+            const handle = obstacle.getObjectByName('handle');
+            if (handle) {
+                handle.rotation.z = Math.sin(time * 15) * 0.1; // Simple wobble
+            }
+        }
+
         
         if (gameState === "playing") {
           obstacleBoxes[i].setFromObject(obstacle);
@@ -359,5 +373,7 @@ export default function Game() {
     </div>
   );
 }
+
+    
 
     
