@@ -145,27 +145,28 @@ export function createBus(): THREE.Group {
 
 // Create the road
 export function createRoad(): THREE.Group {
-  const roadGroup = new THREE.Group();
-  const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
+    const roadGroup = new THREE.Group();
+    const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
 
-  // Main Highway
-  const mainRoadLength = 520;
-  const mainRoadGeometry = new THREE.PlaneGeometry(24, mainRoadLength);
-  const mainRoad = new THREE.Mesh(mainRoadGeometry, roadMaterial);
-  mainRoad.rotation.x = -Math.PI / 2;
-  mainRoad.position.z = -mainRoadLength / 2 + 10;
-  roadGroup.add(mainRoad);
+    // Main Highway
+    const mainRoadLength = 520;
+    const mainRoadGeometry = new THREE.PlaneGeometry(24, mainRoadLength);
+    const mainRoad = new THREE.Mesh(mainRoadGeometry, roadMaterial);
+    mainRoad.rotation.x = -Math.PI / 2;
+    mainRoad.position.z = -mainRoadLength / 2 + 10; // From z=10 to z=-510
+    roadGroup.add(mainRoad);
 
-  // Sub-road to school
-  const subRoadLength = 190;
-  const subRoadGeometry = new THREE.PlaneGeometry(10, subRoadLength);
-  const subRoad = new THREE.Mesh(subRoadGeometry, roadMaterial);
-  subRoad.rotation.x = -Math.PI / 2;
-  subRoad.position.x = 20;
-  subRoad.position.z = 10 + subRoadLength / 2;
-  roadGroup.add(subRoad);
+    // Sub-road to school - now perpendicular
+    const subRoadLength = 190;
+    const subRoadGeometry = new THREE.PlaneGeometry(10, subRoadLength);
+    const subRoad = new THREE.Mesh(subRoadGeometry, roadMaterial);
+    subRoad.rotation.x = -Math.PI / 2;
+    subRoad.rotation.z = Math.PI / 2; // Rotate to be horizontal
+    subRoad.position.x = 12 + subRoadLength / 2; // Position it to the right of the main road
+    subRoad.position.z = -50; // Connect it at z=-50 on the main road
+    roadGroup.add(subRoad);
 
-  return roadGroup;
+    return roadGroup;
 }
 
 // Create road markings
@@ -625,8 +626,10 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
 // Create the school compound
 export function createSchool(): THREE.Group {
     const school = new THREE.Group();
-    school.position.x = 20;
-    school.position.z = 200;
+    // Position the school at the end of the sub-road
+    school.position.x = 12 + 190;
+    school.position.z = -50;
+    school.rotation.y = -Math.PI / 2; // Rotate to face the sub-road
 
     // Compound Wall
     const wallMat = new THREE.MeshLambertMaterial({ color: 0xD2B48C }); // Tan
@@ -763,9 +766,9 @@ export function createFlowers(): THREE.Group {
         flower.position.y = 0.5;
         flowerBed.add(flower);
 
-        const onLeftSide = Math.random() > 0.5;
-        flowerBed.position.x = onLeftSide ? 13.5 : 26.5;
-        flowerBed.position.z = 20 + i * 1.8;
+        const onSide = Math.random() > 0.5;
+        flowerBed.position.x = 12 + 5 + i * 1.8;
+        flowerBed.position.z = -50 + (onSide ? 5.5 : -5.5);
         
         flowers.add(flowerBed);
     }

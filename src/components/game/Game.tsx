@@ -100,8 +100,9 @@ export default function Game() {
     // Game elements
     const bus = createBus();
     scene.add(bus);
-    bus.position.set(20, 0, 180); // Start inside school compound
-    bus.rotation.y = Math.PI;
+    const schoolPos = new THREE.Vector3(12 + 190 - 10, 0, -50);
+    bus.position.set(schoolPos.x, 0, schoolPos.z);
+    bus.rotation.y = -Math.PI/2;
 
 
     scene.add(createRoad());
@@ -151,12 +152,16 @@ export default function Game() {
         if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
         
         // Keep bus on road
-        if (bus.position.z < 10 && bus.position.z > -510) { // On main highway
+        if (bus.position.z > -510 && bus.position.z < 10) { // On main highway
           bus.position.x = Math.max(-12, Math.min(12, bus.position.x));
-        } else if (bus.position.z >= 10) { // On sub-road
-           bus.position.x = Math.max(15, Math.min(25, bus.position.x));
+        } else if (bus.position.z <= -45 && bus.position.z >= -55) { // On sub-road
+           bus.position.x = Math.max(12, Math.min(12 + 190, bus.position.x));
+        } else {
+            // Keep bus within school compound for now
+             if(bus.position.x > 12 + 190 - 25) {
+                 bus.position.x = 12 + 190 - 25;
+             }
         }
-        bus.position.z = Math.max(-510, Math.min(190, bus.position.z));
         
         // Camera follow
         const offset = new THREE.Vector3(0, 7, 12);
@@ -164,7 +169,7 @@ export default function Game() {
         camera.position.lerp(bus.position.clone().add(offset), 0.1);
         camera.lookAt(bus.position);
       } else { // Menu animation
-        camera.position.set(10 + Math.sin(time * 0.2) * 5, 5, 195 + Math.cos(time * 0.2) * 5);
+        camera.position.set(bus.position.x, 5, bus.position.z + 10 + Math.sin(time*0.3) * 2);
         camera.lookAt(bus.position);
       }
 
@@ -213,7 +218,7 @@ export default function Game() {
         });
 
         // Finish condition
-        if(studentsCollected === totalStudents && bus.position.z > 180 && bus.position.x > 15) {
+        if(studentsCollected === totalStudents && bus.position.x > 12 + 190 - 25) {
           addLog("Mission Accomplished! You can continue driving.");
           setCoachMessage("Mission Accomplished! You can continue driving.");
         }
