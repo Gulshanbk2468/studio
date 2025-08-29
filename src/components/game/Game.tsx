@@ -101,7 +101,7 @@ export default function Game() {
     scene.add(bus);
     
     bus.position.set(212, 0.5, -90);
-    bus.rotation.y = Math.PI;
+    bus.rotation.y = 0; // Face the gate
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
@@ -152,7 +152,8 @@ export default function Game() {
       const time = clock.getElapsedTime();
 
       if (gameState === "playing") {
-        const moveDirection = (keysPressed['arrowup'] ? 1 : 0) - (keysPressed['arrowdown'] ? 1 : 0);
+        // Corrected movement direction
+        const moveDirection = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
         if (moveDirection !== 0) {
             moveSpeed += moveDirection * acceleration * delta;
         } else {
@@ -162,8 +163,8 @@ export default function Game() {
 
 
         if(Math.abs(moveSpeed) > 0.1) {
-            const turnDirection = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
-            bus.rotation.y -= turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
+            const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
+            bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
         bus.translateZ(moveSpeed * delta);
@@ -208,7 +209,7 @@ export default function Game() {
 
         // Gate logic
         if (gateLeft && gateRight) {
-          const gateProximity = bus.position.distanceTo(new THREE.Vector3(212, 0, 0));
+          const gateProximity = bus.position.distanceTo(new THREE.Vector3(212, 0, -50));
           const gateOpenPosition = 10;
           const gateClosedPosition = 0;
           
