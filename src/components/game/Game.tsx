@@ -100,7 +100,7 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    bus.position.set(212, 0.5, -25);
+    bus.position.set(212, 0.5, -50);
     bus.rotation.y = Math.PI;
 
     scene.add(createRoad());
@@ -155,11 +155,11 @@ export default function Game() {
       if (gameState === "playing") {
         const moveDirection = (keysPressed['arrowup'] ? 1 : 0) - (keysPressed['arrowdown'] ? 1 : 0);
         if (moveDirection !== 0) {
-            moveSpeed += moveDirection * acceleration * delta;
+            moveSpeed -= moveDirection * acceleration * delta;
         } else {
             moveSpeed *= deceleration;
         }
-        moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
+        moveSpeed = Math.max(-maxSpeed, Math.min(maxSpeed * 0.5, moveSpeed));
 
         if(Math.abs(moveSpeed) > 0.1) {
             const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
@@ -358,3 +358,5 @@ export default function Game() {
     </div>
   );
 }
+
+    

@@ -369,7 +369,7 @@ export function createScenery(): THREE.Group {
 
 // Create students at bus stops
 export function createStudents(): THREE.Mesh[] {
-  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 }); // SaddleBrown - more natural color
+  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x4682B4 }); // SteelBlue - less bright
   const studentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
   const students: THREE.Mesh[] = [];
 
@@ -585,6 +585,16 @@ export function createSchool(): THREE.Group {
     const backWall = new THREE.Mesh(wallGeoBack, wallMat);
     backWall.position.set(0, 2, -120);
     school.add(backWall);
+
+    const wallGeoFront = new THREE.BoxGeometry(25, 4, 0.4);
+    const frontWallLeft = new THREE.Mesh(wallGeoFront, wallMat);
+    frontWallLeft.position.set(-22.5, 2, 0);
+    school.add(frontWallLeft);
+
+    const frontWallRight = new THREE.Mesh(wallGeoFront, wallMat);
+    frontWallRight.position.set(22.5, 2, 0);
+    school.add(frontWallRight);
+
 
     // School Building (U-shape for more realism)
     const buildingMat = new THREE.MeshStandardMaterial({color: 0xFAEBD7, roughness: 0.8}); // AntiqueWhite
@@ -819,3 +829,5 @@ export function createRoadSigns(): THREE.Group {
     
     return signs;
 }
+
+    
