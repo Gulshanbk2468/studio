@@ -101,9 +101,9 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    const schoolPos = new THREE.Vector3(12 + 190 - 10, 0, -50);
-    bus.position.set(schoolPos.x, 0.5, schoolPos.z);
-    bus.rotation.y = -Math.PI / 2;
+    const schoolPos = new THREE.Vector3(12 + 190, 0, -50);
+    bus.position.set(schoolPos.x, 0.5, schoolPos.z + 15); // Start inside school compound
+    bus.rotation.y = Math.PI;
 
 
     scene.add(createRoad());
@@ -139,9 +139,10 @@ export default function Game() {
     const clock = new THREE.Clock();
 
     let moveSpeed = 0;
-    const acceleration = 0.5;
-    const deceleration = 0.95;
+    const acceleration = 12;
+    const deceleration = 0.98;
     const maxSpeed = 15.0;
+    const turnSpeedMultiplier = 0.8;
 
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
@@ -149,36 +150,49 @@ export default function Game() {
       const time = clock.getElapsedTime();
 
       if (gameState === "playing") {
-        const turnSpeed = 0.8 * delta;
 
         if (keysPressed['arrowup']) {
           moveSpeed += acceleration * delta;
-          moveSpeed = Math.min(moveSpeed, maxSpeed * delta);
         } else if (keysPressed['arrowdown']) {
           moveSpeed -= acceleration * delta;
-          moveSpeed = Math.max(moveSpeed, -maxSpeed * delta * 0.5);
         } else {
             moveSpeed *= deceleration;
         }
-
-        bus.translateZ(-moveSpeed);
+        moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
         
         // Prevent turning when not moving
-        if(Math.abs(moveSpeed) > 0.01) {
-            if (keysPressed['arrowleft']) bus.rotation.y += turnSpeed;
-            if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
+        if(Math.abs(moveSpeed) > 0.1) {
+            const turnAngle = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
+            bus.rotation.y += turnAngle * turnSpeedMultiplier * delta * (moveSpeed > 0 ? 1 : -1);
         }
         
-        // Keep bus on road
-        if (bus.position.z > -510 && bus.position.z < 10) { // On main highway
-          bus.position.x = Math.max(-12, Math.min(12, bus.position.x));
-        } else if (bus.position.z <= -45 && bus.position.z >= -55) { // On sub-road
-           bus.position.x = Math.max(12, Math.min(12 + 190, bus.position.x));
-        } else {
-            // Keep bus within school compound for now
-             if(bus.position.x > 12 + 190 - 25) {
-                 bus.position.x = 12 + 190 - 25;
-             }
+        bus.translateZ(moveSpeed * delta);
+
+        const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 25;
+        const SCHOOL_COMPOUND_X_MIN = 12;
+        const SCHOOL_COMPOUND_Z_MAX = 10;
+        const SCHOOL_COMPOUND_Z_MIN = -110;
+        
+        const MAIN_HIGHWAY_X_MAX = 12;
+        const MAIN_HIGHWAY_X_MIN = -12;
+        const MAIN_HIGHWAY_Z_MAX = 10;
+        const MAIN_HIGHWAY_Z_MIN = -510;
+
+        const SUB_ROAD_X_MAX = 12 + 190;
+        const SUB_ROAD_X_MIN = 12;
+        const SUB_ROAD_Z_MAX = -45;
+        const SUB_ROAD_Z_MIN = -55;
+
+        // Road boundary logic
+        if (bus.position.z < MAIN_HIGHWAY_Z_MAX && bus.position.z > MAIN_HIGHWAY_Z_MIN && bus.position.x < SUB_ROAD_X_MIN) { // On main highway
+            bus.position.x = Math.max(MAIN_HIGHWAY_X_MIN, Math.min(MAIN_HIGHWAY_X_MAX, bus.position.x));
+        } else if (bus.position.x > SCHOOL_COMPOUND_X_MIN) { // On sub-road or in school
+            if (bus.position.z > SUB_ROAD_Z_MIN && bus.position.z < SUB_ROAD_Z_MAX) { // On sub-road
+                 bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
+            } else { // In school compound
+                 bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX - 2, bus.position.x));
+                 bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
+            }
         }
         
         // Camera follow
@@ -197,8 +211,8 @@ export default function Game() {
       // Obstacle logic
       obstacles.forEach((obstacle, i) => {
         if (obstacle.userData.type && ['car', 'bike', 'truck', 'bicycle'].includes(obstacle.userData.type)) {
-            const speed = delta * obstacle.userData.speed * (obstacle.userData.direction === -1 ? 1 : -1);
-            obstacle.position.z += speed;
+            const speed = delta * obstacle.userData.speed;
+            obstacle.position.z += speed * obstacle.userData.direction;
             
             if (obstacle.userData.direction === 1 && obstacle.position.z > 20) { // Moving towards start
                 obstacle.position.z = -510;
@@ -211,7 +225,7 @@ export default function Game() {
           obstacleBoxes[i].setFromObject(obstacle);
           if (busBox.intersectsBox(obstacleBoxes[i])) {
               handleInfraction(obstacle.name);
-              obstacle.position.z += 20 * (obstacle.userData.direction === 1 ? -1 : 1); // Move away to prevent multiple hits
+              obstacle.position.z += 20 * (obstacle.userData.direction); // Move away to prevent multiple hits
           }
         }
       });
@@ -220,7 +234,7 @@ export default function Game() {
       if (gameState === "playing") {
         studentZones.forEach((zone, i) => {
           if (studentsRef.current[i].visible && busBox.intersectsBox(zone)) {
-            const currentBusSpeed = Math.abs(moveSpeed / delta);
+            const currentBusSpeed = Math.abs(moveSpeed);
             if (currentBusSpeed < 1.0) {
               studentsRef.current[i].visible = false;
               setScore(s => s + 10);
