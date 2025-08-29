@@ -229,29 +229,7 @@ function createHouses(): THREE.Group {
       return house;
     };
   
-    // Modern style house with clean lines
-    const createModernHouse = () => {
-      const house = new THREE.Group();
-      const mainMat = new THREE.MeshLambertMaterial({ color: 0xE0E0E0 }); // LightGray
-      const accentMat = new THREE.MeshLambertMaterial({ color: 0x757575 }); // MidGray
-      
-      const mainBlock = new THREE.Mesh(new THREE.BoxGeometry(7, 5, 5), mainMat);
-      mainBlock.position.y = 2.5;
-      house.add(mainBlock);
-  
-      const accentBlock = new THREE.Mesh(new THREE.BoxGeometry(3, 6, 4), accentMat);
-      accentBlock.position.set(-2.5, 3, 1.5);
-      house.add(accentBlock);
-  
-      const windowMat = new THREE.MeshLambertMaterial({ color: 0x222222, transparent: true, opacity: 0.6 });
-      const window = new THREE.Mesh(new THREE.PlaneGeometry(5, 2), windowMat);
-      window.position.set(1.5, 3, 2.51);
-      house.add(window);
-  
-      return house;
-    };
-
-    const houseTypes = [createOldNepaliHouse, createModernHouse];
+    const houseTypes = [createOldNepaliHouse];
 
     for (let i = 0; i < 40; i++) {
       const randomTypeIndex = Math.floor(Math.random() * houseTypes.length);
@@ -386,7 +364,7 @@ export function createScenery(): THREE.Group {
 
 // Create students at bus stops
 export function createStudents(): THREE.Mesh[] {
-  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x607D8B }); // Blue-Grey
+  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x455A64 }); // Darker Blue-Grey
   const studentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
   const students: THREE.Mesh[] = [];
 
@@ -753,4 +731,76 @@ export function createFlowers(): THREE.Group {
     return flowers;
 }
 
+function createSign(text: string, arrowDirection: 'left' | 'right'): THREE.Group {
+    const group = new THREE.Group();
+
+    // Pole
+    const poleMat = new THREE.MeshLambertMaterial({ color: 0x808080 });
+    const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 4, 12);
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.y = 2;
+    group.add(pole);
+
+    // Signboard
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    const boardWidth = 512;
+    const boardHeight = 128;
+    canvas.width = boardWidth;
+    canvas.height = boardHeight;
     
+    if (context) {
+        // Background
+        context.fillStyle = '#008000'; // Green
+        context.fillRect(0, 0, boardWidth, boardHeight);
+
+        // Text
+        context.fillStyle = 'white';
+        context.font = 'bold 60px Arial';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(text, boardWidth / 2, boardHeight / 2);
+
+        // Arrow
+        context.strokeStyle = 'white';
+        context.lineWidth = 10;
+        context.beginPath();
+        if (arrowDirection === 'left') {
+            context.moveTo(70, boardHeight / 2);
+            context.lineTo(30, boardHeight / 2);
+            context.moveTo(50, boardHeight / 2 - 20);
+            context.lineTo(30, boardHeight / 2);
+            context.lineTo(50, boardHeight / 2 + 20);
+        } else { // right
+            context.moveTo(boardWidth - 70, boardHeight / 2);
+            context.lineTo(boardWidth - 30, boardHeight / 2);
+            context.moveTo(boardWidth - 50, boardHeight / 2 - 20);
+            context.lineTo(boardWidth - 30, boardHeight / 2);
+            context.lineTo(boardWidth - 50, boardHeight / 2 + 20);
+        }
+        context.stroke();
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const signMat = new THREE.MeshBasicMaterial({ map: texture });
+    const signGeo = new THREE.PlaneGeometry(4, 1);
+    const sign = new THREE.Mesh(signGeo, signMat);
+    sign.position.y = 4;
+    group.add(sign);
+
+    return group;
+}
+
+export function createRoadSigns(): THREE.Group {
+    const signs = new THREE.Group();
+
+    const milanchokSign = createSign('Milanchok', 'left');
+    milanchokSign.position.set(-15, 0, -100);
+    signs.add(milanchokSign);
+
+    const ghattekholaSign = createSign('Ghattekhola', 'right');
+    ghattekholaSign.position.set(15, 0, -100);
+    signs.add(ghattekholaSign);
+    
+    return signs;
+}

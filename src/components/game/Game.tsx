@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops, createZebraCross, createFlowers } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops, createZebraCross, createFlowers, createRoadSigns } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -113,6 +113,7 @@ export default function Game() {
     scene.add(createShops());
     scene.add(createSchool());
     scene.add(createFlowers());
+    scene.add(createRoadSigns());
     
     const zebraCrossings = [createZebraCross(-150), createZebraCross(-350), createZebraCross(50)];
     zebraCrossings.forEach(z => scene.add(z));
@@ -142,7 +143,7 @@ export default function Game() {
     const acceleration = 12;
     const deceleration = 0.98;
     const maxSpeed = 15.0;
-    const turnSpeedMultiplier = 0.8;
+    const turnSpeed = 1.0;
 
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
@@ -152,20 +153,20 @@ export default function Game() {
       if (gameState === "playing") {
 
         if (keysPressed['arrowup']) {
-          moveSpeed -= acceleration * delta; // Forward
+          moveSpeed += acceleration * delta;
         } else if (keysPressed['arrowdown']) {
-          moveSpeed += acceleration * delta; // Backward
+          moveSpeed -= acceleration * delta;
         } else {
             moveSpeed *= deceleration;
         }
-        moveSpeed = Math.max(-maxSpeed, Math.min(maxSpeed * 0.5, moveSpeed));
+        moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
         
         if(Math.abs(moveSpeed) > 0.1) {
-            const turnAngle = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
-            bus.rotation.y += turnAngle * turnSpeedMultiplier * delta * (moveSpeed > 0 ? -1 : 1);
+            const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
+            bus.rotation.y += turnDirection * turnSpeed * delta * (moveSpeed > 0 ? 1 : -1);
         }
         
-        bus.translateZ(-moveSpeed * delta);
+        bus.translateZ(moveSpeed * delta);
 
         const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 35;
         const SCHOOL_COMPOUND_X_MIN = 12;
@@ -322,7 +323,3 @@ export default function Game() {
     </div>
   );
 }
-
-    
-
-    
