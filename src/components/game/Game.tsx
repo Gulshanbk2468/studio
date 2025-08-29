@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -108,7 +108,6 @@ export default function Game() {
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
-    scene.add(createZebraCross());
     scene.add(createScenery());
     scene.add(createTrees());
     scene.add(createShops());
@@ -161,19 +160,20 @@ export default function Game() {
       // Obstacle logic
       obstacles.forEach((obstacle, i) => {
         if (obstacle.userData.type && ['car', 'bike', 'truck', 'bicycle'].includes(obstacle.userData.type)) {
-            obstacle.position.z += delta * obstacle.userData.speed;
-            if (obstacle.position.z > 20) {
-              obstacle.position.z = -490;
-              // Vary speed and lane on reset
-              obstacle.userData.speed = 10 + Math.random() * 20;
-              obstacle.position.x = (Math.random() > 0.5 ? 1 : -1) * (obstacle.userData.type === 'bike' || obstacle.userData.type === 'bicycle' ? 10 : 6);
+            const speed = delta * obstacle.userData.speed * (obstacle.userData.direction === -1 ? -1 : 1);
+            obstacle.position.z += speed;
+            
+            if (obstacle.userData.direction === 1 && obstacle.position.z > 20) { // Moving towards start
+                obstacle.position.z = -490;
+            } else if (obstacle.userData.direction === -1 && obstacle.position.z < -490) { // Moving away from start
+                obstacle.position.z = 20;
             }
         }
         
         obstacleBoxes[i].setFromObject(obstacle);
         if (busBox.intersectsBox(obstacleBoxes[i])) {
             handleInfraction(obstacle.name);
-            obstacle.position.z += 20; // Move away to prevent multiple hits
+            obstacle.position.z += 20 * (obstacle.userData.direction === 1 ? 1 : -1); // Move away to prevent multiple hits
         }
       });
 

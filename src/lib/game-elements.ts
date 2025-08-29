@@ -287,23 +287,47 @@ function createHouses(): THREE.Group {
 
 export function createTrees(): THREE.Group {
     const trees = new THREE.Group();
-    const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B4513 }); // SaddleBrown
-    const leavesMat = new THREE.MeshLambertMaterial({ color: 0x006400 }); // DarkGreen
-    const trunkGeo = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
-    const leavesGeo = new THREE.ConeGeometry(1.5, 4, 8);
+    
+    const createPineTree = () => {
+        const tree = new THREE.Group();
+        const trunkMat = new THREE.MeshLambertMaterial({ color: 0x654321 }); 
+        const leavesMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2.5, 8), trunkMat);
+        trunk.position.y = 1.25;
+        tree.add(trunk);
+        
+        let h = 2.5;
+        for(let i=0; i<3; i++) {
+            const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5 - i*0.3, 2, 8), leavesMat);
+            leaves.position.y = h;
+            h += 1;
+            tree.add(leaves);
+        }
+        return tree;
+    }
+
+    const createDeciduousTree = () => {
+        const tree = new THREE.Group();
+        const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+        const leavesMat = new THREE.MeshLambertMaterial({ color: 0x006400 });
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 3, 8), trunkMat);
+        trunk.position.y = 1.5;
+        tree.add(trunk);
+        const leaves = new THREE.Mesh(new THREE.SphereGeometry(2, 8, 6), leavesMat);
+        leaves.position.y = 4;
+        tree.add(leaves);
+        return tree;
+    }
+
+    const treeTypes = [createPineTree, createDeciduousTree];
   
-    for (let i = 0; i < 40; i++) {
-      const tree = new THREE.Group();
-      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-      trunk.position.y = 1;
-      tree.add(trunk);
-      const leaves = new THREE.Mesh(leavesGeo, leavesMat);
-      leaves.position.y = 2 + 2;
-      tree.add(leaves);
+    for (let i = 0; i < 60; i++) {
+      const treeTypeIndex = Math.floor(Math.random() * treeTypes.length);
+      const tree = treeTypes[treeTypeIndex]();
   
       const onLeftSide = Math.random() > 0.5;
       tree.position.x = onLeftSide ? -18 - Math.random() * 20 : 18 + Math.random() * 20;
-      tree.position.z = -i * 12 - Math.random() * 10;
+      tree.position.z = -i * 8 - Math.random() * 8;
       trees.add(tree);
     }
     return trees;
@@ -555,32 +579,22 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
     }
     
     // Create instances
-    for (let i = 0; i < 3; i++) {
-        const car = createCar();
-        car.position.set(-6, 0, -70 - i * 120 - Math.random()*50);
-        car.userData.speed = 20 + Math.random() * 10;
-        obstacles.push(car);
-    }
-    
-    for (let i = 0; i < 3; i++) {
-        const bike = createMotorbike();
-        bike.position.set(10, 0, -40 - i * 150 - Math.random()*50);
-        bike.userData.speed = 30 + Math.random() * 10;
-        obstacles.push(bike);
-    }
-    
-    for (let i = 0; i < 2; i++) {
-        const truck = createTruck();
-        truck.position.set(6, 0, -150 - i * 180 - Math.random()*50);
-        truck.userData.speed = 15 + Math.random() * 5;
-        obstacles.push(truck);
-    }
-    
-    for (let i = 0; i < 2; i++) {
-        const bicycle = createBicycle();
-        bicycle.position.set(-10, 0, -100 - i * 120 - Math.random()*50);
-        bicycle.userData.speed = 8 + Math.random() * 5;
-        obstacles.push(bicycle);
+    const vehicleTypes = [createCar, createMotorbike, createTruck, createBicycle];
+    for (let i = 0; i < 10; i++) {
+        const typeIndex = Math.floor(Math.random() * vehicleTypes.length);
+        const vehicle = vehicleTypes[typeIndex]();
+        const onLeftSide = Math.random() > 0.5;
+        
+        vehicle.position.set(
+            onLeftSide ? -6 : 6, 
+            0, 
+            -Math.random() * 450
+        );
+        vehicle.userData.speed = 10 + Math.random() * 20;
+        vehicle.userData.direction = onLeftSide ? -1 : 1; // -1 for returning, 1 for outgoing
+        if(onLeftSide) vehicle.rotation.y = Math.PI;
+
+        obstacles.push(vehicle);
     }
 
     for (let i = 0; i < 3; i++) {
@@ -667,5 +681,6 @@ export function createZebraCross(): THREE.Group {
     
 
     
+
 
 
