@@ -157,12 +157,12 @@ export function createRoad(): THREE.Group {
   roadGroup.add(mainRoad);
 
   // Sub-road to school
-  const subRoadLength = 200;
+  const subRoadLength = 190;
   const subRoadGeometry = new THREE.PlaneGeometry(10, subRoadLength);
   const subRoad = new THREE.Mesh(subRoadGeometry, roadMaterial);
   subRoad.rotation.x = -Math.PI / 2;
   subRoad.position.x = 20;
-  subRoad.position.z = subRoadLength / 2 + 10;
+  subRoad.position.z = 10 + subRoadLength / 2;
   roadGroup.add(subRoad);
 
   return roadGroup;
