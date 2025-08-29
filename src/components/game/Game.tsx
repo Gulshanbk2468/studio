@@ -152,17 +152,18 @@ export default function Game() {
       const time = clock.getElapsedTime();
 
       if (gameState === "playing") {
-        // Corrected movement direction
-        const moveDirection = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
+        // Corrected movement direction: Up arrow should move forward (negative Z is forward in Three.js)
+        const moveDirection = (keysPressed['arrowup'] ? -1 : 0) + (keysPressed['arrowdown'] ? 1 : 0);
         if (moveDirection !== 0) {
             moveSpeed += moveDirection * acceleration * delta;
         } else {
             moveSpeed *= deceleration;
         }
-        moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
+        moveSpeed = Math.max(-maxSpeed, Math.min(maxSpeed * 0.5, moveSpeed));
 
 
         if(Math.abs(moveSpeed) > 0.1) {
+            // Corrected turn direction
             const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
             bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
@@ -376,3 +377,5 @@ export default function Game() {
     </div>
   );
 }
+
+    
