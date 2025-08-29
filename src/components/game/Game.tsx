@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops, createZebraCross } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops, createZebraCross, createFlowers } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -100,7 +100,7 @@ export default function Game() {
     // Game elements
     const bus = createBus();
     scene.add(bus);
-    bus.position.set(20, 0, 480);
+    bus.position.set(20, 0, 180); // Start inside school compound
     bus.rotation.y = Math.PI;
 
 
@@ -110,6 +110,7 @@ export default function Game() {
     scene.add(createTrees());
     scene.add(createShops());
     scene.add(createSchool());
+    scene.add(createFlowers());
     
     const zebraCrossings = [createZebraCross(-150), createZebraCross(-350), createZebraCross(50)];
     zebraCrossings.forEach(z => scene.add(z));
@@ -155,7 +156,7 @@ export default function Game() {
         } else if (bus.position.z >= 10) { // On sub-road
            bus.position.x = Math.max(15, Math.min(25, bus.position.x));
         }
-        bus.position.z = Math.max(-510, Math.min(490, bus.position.z));
+        bus.position.z = Math.max(-510, Math.min(190, bus.position.z));
         
         // Camera follow
         const offset = new THREE.Vector3(0, 7, 12);
@@ -163,7 +164,7 @@ export default function Game() {
         camera.position.lerp(bus.position.clone().add(offset), 0.1);
         camera.lookAt(bus.position);
       } else { // Menu animation
-        camera.position.set(10 + Math.sin(time * 0.2) * 5, 5, 495 + Math.cos(time * 0.2) * 5);
+        camera.position.set(10 + Math.sin(time * 0.2) * 5, 5, 195 + Math.cos(time * 0.2) * 5);
         camera.lookAt(bus.position);
       }
 
@@ -212,7 +213,7 @@ export default function Game() {
         });
 
         // Finish condition
-        if(studentsCollected === totalStudents && bus.position.z > 480 && bus.position.x > 15) {
+        if(studentsCollected === totalStudents && bus.position.z > 180 && bus.position.x > 15) {
           addLog("Mission Accomplished! You can continue driving.");
           setCoachMessage("Mission Accomplished! You can continue driving.");
         }
