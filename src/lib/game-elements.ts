@@ -206,13 +206,13 @@ function createHouses(): THREE.Group {
       return house;
     };
   
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 40; i++) {
       const isModern = Math.random() > 0.5;
       const house = isModern ? createModernHouse() : createOldHouse();
       const onLeftSide = Math.random() > 0.5;
       
-      house.position.x = onLeftSide ? -25 : 25;
-      house.position.z = -20 - i * 55 - Math.random() * 20;
+      house.position.x = onLeftSide ? -25 - Math.random() * 10 : 25 + Math.random() * 10;
+      house.position.z = -i * 12 - Math.random() * 5;
       house.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
       
       houses.add(house);
