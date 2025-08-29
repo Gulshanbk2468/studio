@@ -101,14 +101,19 @@ export default function Game() {
     scene.add(bus);
     
     bus.position.set(212, 0.5, -40);
-    bus.rotation.y = Math.PI/2;
+    bus.rotation.y = -Math.PI/2;
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
     scene.add(createScenery());
     scene.add(createTrees());
     scene.add(createShops());
-    scene.add(createSchool());
+    
+    const school = createSchool();
+    scene.add(school);
+    const gateLeft = school.getObjectByName('gateLeft');
+    const gateRight = school.getObjectByName('gateRight');
+
     scene.add(createFlowers());
     scene.add(createRoadSigns());
     
@@ -158,10 +163,10 @@ export default function Game() {
 
         if(Math.abs(moveSpeed) > 0.1) {
             const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
-            bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
+            bus.rotation.y -= turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
-        bus.translateZ(moveSpeed * delta);
+        bus.translateZ(-moveSpeed * delta);
 
         const MAIN_HIGHWAY_X_MAX = 12;
         const MAIN_HIGHWAY_X_MIN = -12;
@@ -175,8 +180,8 @@ export default function Game() {
         
         const SCHOOL_COMPOUND_X_MAX = 12 + 200 + 35;
         const SCHOOL_COMPOUND_X_MIN = 12 + 200 - 35;
-        const SCHOOL_COMPOUND_Z_MAX = -45 + 60;
-        const SCHOOL_COMPOUND_Z_MIN = -45 - 60;
+        const SCHOOL_COMPOUND_Z_MAX = -50 + 60;
+        const SCHOOL_COMPOUND_Z_MIN = -50 - 60;
 
         let inSchoolCompound = bus.position.x >= SCHOOL_COMPOUND_X_MIN && bus.position.x <= SCHOOL_COMPOUND_X_MAX &&
                                 bus.position.z >= SCHOOL_COMPOUND_Z_MIN && bus.position.z <= SCHOOL_COMPOUND_Z_MAX;
@@ -187,28 +192,42 @@ export default function Game() {
         let onSubRoad = bus.position.x >= SUB_ROAD_X_MIN && bus.position.x <= SUB_ROAD_X_MAX &&
                          bus.position.z >= SUB_ROAD_Z_MIN && bus.position.z <= SUB_ROAD_Z_MAX;
         
-        let inTransition = onSubRoad && bus.position.x > (12 + 200 - 20); // Near the school gate
 
-        if (!inTransition) {
-          if (onMainHighway) {
-              bus.position.x = Math.max(MAIN_HIGHWAY_X_MIN, Math.min(MAIN_HIGHWAY_X_MAX, bus.position.x));
+        if (onMainHighway) {
+            bus.position.x = Math.max(MAIN_HIGHWAY_X_MIN, Math.min(MAIN_HIGHWAY_X_MAX, bus.position.x));
+            if(!onSubRoad){
               bus.position.z = Math.max(MAIN_HIGHWAY_Z_MIN, Math.min(MAIN_HIGHWAY_Z_MAX, bus.position.z));
-          } else if (onSubRoad) {
-              bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
-              bus.position.z = Math.max(SUB_ROAD_Z_MIN, Math.min(SUB_ROAD_Z_MAX, bus.position.z));
-          } else if (inSchoolCompound) {
-            const school_x_min = 12 + 200 - 35;
-            const school_x_max = 12 + 200 + 35;
-            const school_z_min = -50 - 55;
-            const school_z_max = -50 + 55;
-            bus.position.x = Math.max(school_x_min, Math.min(school_x_max, bus.position.x));
-            bus.position.z = Math.max(school_z_min, Math.min(school_z_max, bus.position.z));
+            }
+        } else if (onSubRoad) {
+            bus.position.z = Math.max(SUB_ROAD_Z_MIN, Math.min(SUB_ROAD_Z_MAX, bus.position.z));
+             if(!onMainHighway){
+                bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
+             }
+        } else if (inSchoolCompound) {
+          bus.position.x = Math.max(SCHOOL_COMPOUND_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX, bus.position.x));
+          bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
+        }
+
+        // Gate logic
+        if (gateLeft && gateRight) {
+          const gateProximity = bus.position.distanceTo(school.position);
+          const gateOpenPosition = 10;
+          const gateClosedPosition = 0;
+          
+          if (gateProximity < 30) { // Bus is near the gate
+              // Open gate
+              gateLeft.position.x = THREE.MathUtils.lerp(gateLeft.position.x, -gateOpenPosition, 0.1);
+              gateRight.position.x = THREE.MathUtils.lerp(gateRight.position.x, gateOpenPosition, 0.1);
+          } else {
+              // Close gate
+              gateLeft.position.x = THREE.MathUtils.lerp(gateLeft.position.x, gateClosedPosition, 0.1);
+              gateRight.position.x = THREE.MathUtils.lerp(gateRight.position.x, gateClosedPosition, 0.1);
           }
         }
 
 
         // Camera follow
-        const offset = new THREE.Vector3(0, 7, -12); // Camera behind the bus
+        const offset = new THREE.Vector3(0, 7, 12); // Camera behind the bus
         offset.applyQuaternion(bus.quaternion);
         camera.position.lerp(bus.position.clone().add(offset), 0.1);
         camera.lookAt(bus.position);
@@ -277,7 +296,7 @@ export default function Game() {
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth / window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
     window.addEventListener('resize', handleResize);
 
@@ -335,5 +354,3 @@ export default function Game() {
     </div>
   );
 }
-
-    

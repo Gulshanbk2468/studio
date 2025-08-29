@@ -353,7 +353,7 @@ export function createShops(): THREE.Group {
 export function createScenery(): THREE.Group {
   const scenery = new THREE.Group();
 
-  // Ground with Terraced Fields
+  // Ground
   const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x556B2F }); // DarkOliveGreen
   const groundGeometry = new THREE.PlaneGeometry(800, 1000);
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -369,7 +369,7 @@ export function createScenery(): THREE.Group {
 
 // Create students at bus stops
 export function createStudents(): THREE.Mesh[] {
-  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x4682B4 }); // SteelBlue
+  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 }); // SaddleBrown - more natural color
   const studentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
   const students: THREE.Mesh[] = [];
 
@@ -380,7 +380,7 @@ export function createStudents(): THREE.Mesh[] {
       student.position.set(13 + Math.random(), 0.75, zPos + (Math.random()-0.5)*5);
       student.name = `student_stop_${zPos}`;
       // Prevent students at the intersection
-      if (student.position.z > -60) continue;
+      if (student.position.z > -60 && student.position.z < -40) continue;
       students.push(student);
     }
   });
@@ -638,31 +638,40 @@ export function createSchool(): THREE.Group {
     door.position.set(0, 3, -48.8);
     school.add(door);
 
-
     // Gate
-    const gate = new THREE.Group();
+    const gateContainer = new THREE.Group();
     const postMat = new THREE.MeshLambertMaterial({ color: 0x808080 }); // Gray
     const postGeo = new THREE.BoxGeometry(1.5, 6, 1.5);
     const post1 = new THREE.Mesh(postGeo, postMat);
     post1.position.set(-10, 3, 0);
-    gate.add(post1);
+    gateContainer.add(post1);
     
     const post2 = post1.clone();
     post2.position.x = 10;
-    gate.add(post2);
-
+    gateContainer.add(post2);
+    
     const gateBarMat = new THREE.MeshLambertMaterial({color: 0x555555});
     const gateBarGeo = new THREE.BoxGeometry(9.5, 0.3, 0.3);
+    
+    const gateLeft = new THREE.Group();
+    gateLeft.name = "gateLeft";
     for(let i=0; i < 12; i++){
-        const barL = new THREE.Mesh(gateBarGeo, gateBarMat);
-        barL.position.set(-4.75, 0.6 + i*0.4, 0);
-        gate.add(barL);
-        const barR = barL.clone();
-        barR.position.x = 4.75;
-        gate.add(barR);
+        const bar = new THREE.Mesh(gateBarGeo, gateBarMat);
+        bar.position.set(-4.75, 0.6 + i*0.4, 0);
+        gateLeft.add(bar);
     }
-    gate.position.z = 0.5;
+    gateContainer.add(gateLeft);
+    
+    const gateRight = new THREE.Group();
+    gateRight.name = "gateRight";
+    for(let i=0; i < 12; i++){
+        const bar = new THREE.Mesh(gateBarGeo, gateBarMat);
+        bar.position.set(4.75, 0.6 + i*0.4, 0);
+        gateRight.add(bar);
+    }
+    gateContainer.add(gateRight);
 
+    gateContainer.position.z = 0.5;
 
     // Gate Sign
     const canvas = document.createElement('canvas');
@@ -682,9 +691,9 @@ export function createSchool(): THREE.Group {
     const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(20, 4), signMaterial);
     sign.position.set(0, 7, 0);
-    gate.add(sign);
+    gateContainer.add(sign);
 
-    school.add(gate);
+    school.add(gateContainer);
     return school;
 }
 
