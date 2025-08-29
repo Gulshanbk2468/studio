@@ -291,10 +291,8 @@ function createHouses(): THREE.Group {
       const zPos = -i * 12 - 20 - Math.random() * 5;
       
       // Prevent houses near the school road and its intersection
-      const inSchoolRoadXRange = house.position.x > 12;
-      const inSchoolRoadZRange = zPos > -60 && zPos < -40;
-      if (inSchoolRoadXRange && inSchoolRoadZRange) continue;
-
+      const onSubRoad = house.position.x > 12 && zPos > -60 && zPos < -40;
+      if (onSubRoad) continue;
 
       house.position.x = onLeftSide ? -25 - Math.random() * 15 : 25 + Math.random() * 15;
       house.position.z = zPos;
@@ -309,24 +307,6 @@ function createHouses(): THREE.Group {
 export function createTrees(): THREE.Group {
     const trees = new THREE.Group();
     
-    const createPineTree = () => {
-        const tree = new THREE.Group();
-        const trunkMat = new THREE.MeshLambertMaterial({ color: 0x654321 }); 
-        const leavesMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2.5, 8), trunkMat);
-        trunk.position.y = 1.25;
-        tree.add(trunk);
-        
-        let h = 2.5;
-        for(let i=0; i<3; i++) {
-            const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.5 - i*0.3, 2, 8), leavesMat);
-            leaves.position.y = h;
-            h += 1;
-            tree.add(leaves);
-        }
-        return tree;
-    }
-
     const createDeciduousTree = () => {
         const tree = new THREE.Group();
         const trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
@@ -340,7 +320,7 @@ export function createTrees(): THREE.Group {
         return tree;
     }
 
-    const treeTypes = [createPineTree, createDeciduousTree];
+    const treeTypes = [createDeciduousTree];
   
     for (let i = 0; i < 120; i++) {
       const treeTypeIndex = Math.floor(Math.random() * treeTypes.length);
@@ -428,7 +408,7 @@ export function createScenery(): THREE.Group {
 
 // Create students at bus stops
 export function createStudents(): THREE.Mesh[] {
-  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x0000FF }); // Blue
+  const studentMaterial = new THREE.MeshLambertMaterial({ color: 0x607D8B }); // Blue-Grey
   const studentGeometry = new THREE.CylinderGeometry(0.3, 0.3, 1.5, 8);
   const students: THREE.Mesh[] = [];
 
