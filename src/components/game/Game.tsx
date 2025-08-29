@@ -238,13 +238,13 @@ export default function Game() {
 
   return (
     <div className="relative h-screen w-screen">
-       <header className="absolute top-0 left-0 right-0 z-20 flex justify-center p-4">
-        <h1 className="text-2xl md:text-4xl font-bold font-headline text-center bg-primary/80 text-primary-foreground py-2 px-6 rounded-lg shadow-lg backdrop-blur-sm">
-          Hemja Highway Hero
-        </h1>
-      </header>
       {gameState === 'playing' && (
         <>
+          <header className="absolute top-0 left-0 right-0 z-20 flex justify-center p-4">
+            <h1 className="text-2xl md:text-4xl font-bold font-headline text-center bg-primary/80 text-primary-foreground py-2 px-6 rounded-lg shadow-lg backdrop-blur-sm whitespace-nowrap">
+              Hemja Highway Hero
+            </h1>
+          </header>
           <ControlsGuide />
         </>
       )}
@@ -252,51 +252,30 @@ export default function Game() {
       {gameState === 'menu' && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/50 animate-fade-in">
              <div className="w-full max-w-4xl mx-auto">
-                <Card className="grid grid-cols-1 md:grid-cols-2 overflow-hidden shadow-2xl border-4 border-primary/50">
-                    <CardHeader className="p-0 relative">
+                <Card className="overflow-hidden shadow-2xl border-4 border-primary/50">
+                    <div className="relative">
                         <Image 
-                            src="https://picsum.photos/800/600" 
-                            width={800} 
-                            height={600} 
+                            src="https://picsum.photos/seed/school/1200/600"
+                            width={1200}
+                            height={600}
                             alt="Shree Ambika Secondary School"
-                            data-ai-hint="school bus" 
-                            className="object-cover w-full h-full"
+                            data-ai-hint="school building"
+                            className="object-cover w-full h-96"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                         <CardTitle className="absolute bottom-0 left-0 p-6 text-3xl font-bold text-white font-headline">
-                            Shree Ambika Secondary School
-                        </CardTitle>
-                    </CardHeader>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
+                            <h1 className="text-4xl font-bold text-white font-headline whitespace-nowrap">
+                                Shree Ambika Secondary School
+                            </h1>
+                        </div>
+                    </div>
                     <div className="flex flex-col justify-center p-8 bg-card">
-                        <CardDescription className="text-lg text-muted-foreground mb-8">
+                        <CardDescription className="text-lg text-muted-foreground mb-8 text-center">
                             Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!
                         </CardDescription>
                         <CardContent className="p-0 flex flex-col gap-4">
                              <Button onClick={startGame} size="lg" className="w-full text-lg py-6">
                                 Start Driving
                             </Button>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Link href="/leaderboard" className="w-full">
-                                    <Button size="lg" variant="secondary" className="w-full text-lg">Leaderboard</Button>
-                                </Link>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="secondary" size="lg" className="w-full text-lg">About</Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                        <AlertDialogTitle>About Hemja Highway Hero</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This game is a 3D bus driving simulator.
-                                            Developed with ❤️ using Next.js and Three.js.
-                                        </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                        <AlertDialogAction>Got it!</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </div>
                         </CardContent>
                     </div>
                 </Card>
