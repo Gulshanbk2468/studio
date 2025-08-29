@@ -336,15 +336,18 @@ export default function Game() {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [gameId]);
+  }, [gameId, gameState]);
 
   const startGame = () => {
-    setGameId(id => id + 1);
+    if (gameState === 'playing') {
+        setGameId(id => id + 1);
+    }
     setScore(0);
     setGameLog([]);
     setCoachMessage("");
     setInfractionCount(0);
     setStudentsCollected(0);
+    setTotalStudents(0);
     setGameState("playing");
     addLog("Game started. Pick up all students and return to school.");
   };
@@ -388,5 +391,3 @@ export default function Game() {
     </div>
   );
 }
-
-    
