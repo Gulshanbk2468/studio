@@ -100,8 +100,8 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    bus.position.set(212, 0.5, -40);
-    bus.rotation.y = -Math.PI/2;
+    bus.position.set(212, 0.5, -25);
+    bus.rotation.y = Math.PI;
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
@@ -163,10 +163,10 @@ export default function Game() {
 
         if(Math.abs(moveSpeed) > 0.1) {
             const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
-            bus.rotation.y -= turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
+            bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
-        bus.translateZ(-moveSpeed * delta);
+        bus.translateZ(moveSpeed * delta);
 
         const MAIN_HIGHWAY_X_MAX = 12;
         const MAIN_HIGHWAY_X_MIN = -12;
@@ -193,19 +193,17 @@ export default function Game() {
                          bus.position.z >= SUB_ROAD_Z_MIN && bus.position.z <= SUB_ROAD_Z_MAX;
         
 
-        if (onMainHighway) {
+        if (onMainHighway && !onSubRoad) {
             bus.position.x = Math.max(MAIN_HIGHWAY_X_MIN, Math.min(MAIN_HIGHWAY_X_MAX, bus.position.x));
-            if(!onSubRoad){
-              bus.position.z = Math.max(MAIN_HIGHWAY_Z_MIN, Math.min(MAIN_HIGHWAY_Z_MAX, bus.position.z));
-            }
-        } else if (onSubRoad) {
-            bus.position.z = Math.max(SUB_ROAD_Z_MIN, Math.min(SUB_ROAD_Z_MAX, bus.position.z));
-             if(!onMainHighway){
-                bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
-             }
+            bus.position.z = Math.max(MAIN_HIGHWAY_Z_MIN, Math.min(MAIN_HIGHWAY_Z_MAX, bus.position.z));
+        } else if (onSubRoad && !onMainHighway) {
+             bus.position.z = Math.max(SUB_ROAD_Z_MIN, Math.min(SUB_ROAD_Z_MAX, bus.position.z));
+             bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
         } else if (inSchoolCompound) {
           bus.position.x = Math.max(SCHOOL_COMPOUND_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX, bus.position.x));
           bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
+        } else if (!onMainHighway && !onSubRoad && !inSchoolCompound) {
+          // Fallback if bus gets out of bounds somehow
         }
 
         // Gate logic
@@ -214,14 +212,14 @@ export default function Game() {
           const gateOpenPosition = 10;
           const gateClosedPosition = 0;
           
-          if (gateProximity < 30) { // Bus is near the gate
+          if (gateProximity < 40) { // Bus is near the gate
               // Open gate
-              gateLeft.position.x = THREE.MathUtils.lerp(gateLeft.position.x, -gateOpenPosition, 0.1);
-              gateRight.position.x = THREE.MathUtils.lerp(gateRight.position.x, gateOpenPosition, 0.1);
+              gateLeft.position.x = THREE.MathUtils.lerp(gateLeft.position.x, -gateOpenPosition, 0.05);
+              gateRight.position.x = THREE.MathUtils.lerp(gateRight.position.x, gateOpenPosition, 0.05);
           } else {
               // Close gate
-              gateLeft.position.x = THREE.MathUtils.lerp(gateLeft.position.x, gateClosedPosition, 0.1);
-              gateRight.position.x = THREE.MathUtils.lerp(gateRight.position.x, gateClosedPosition, 0.1);
+              gateLeft.position.x = THREE.MathUtils.lerp(gateLeft.position.x, gateClosedPosition, 0.05);
+              gateRight.position.x = THREE.MathUtils.lerp(gateRight.position.x, gateClosedPosition, 0.05);
           }
         }
 
@@ -281,9 +279,15 @@ export default function Game() {
         });
 
         // Finish condition
-        if(studentsCollected === totalStudents && bus.position.x > 212 - 25 && bus.position.z < -45 && bus.position.z > -55) {
+        const schoolFinishZone = new THREE.Box3(
+          new THREE.Vector3(212 - 15, 0, -50 - 15),
+          new THREE.Vector3(212 + 15, 5, -50 + 15)
+        );
+
+        if(studentsCollected === totalStudents && busBox.intersectsBox(schoolFinishZone)) {
           addLog("Mission Accomplished! You can continue driving.");
           setCoachMessage("Mission Accomplished! You can continue driving.");
+          // To prevent message from repeatedly showing, maybe set a new game state.
         }
       }
 
