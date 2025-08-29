@@ -128,7 +128,7 @@ export default function Game() {
     obstacles.forEach(o => scene.add(o));
 
     const busBox = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
-    const obstacleBoxes = obstacles.map(() => new THREE.Box3(new THREE.Vector3(), new THREE.Vector3()));
+    const obstacleBoxes = obstacles.map(o => new THREE.Box3().setFromObject(o));
     const studentZones = studentsRef.current.map(s => new THREE.Box3().setFromObject(s).expandByVector(new THREE.Vector3(3,3,3)));
     
     // Controls
@@ -270,7 +270,9 @@ export default function Game() {
           obstacleBoxes[i].setFromObject(obstacle);
           if (busBox.intersectsBox(obstacleBoxes[i])) {
               handleInfraction(obstacle.name);
-              obstacle.position.z += 20 * (obstacle.userData.direction || 1); // Move away to prevent multiple hits
+              // Move obstacle out of the way to prevent multiple rapid collisions
+              const moveDirection = Math.sign(bus.position.z - obstacle.position.z) || 1;
+              obstacle.position.z += moveDirection * 10;
           }
         }
       });
@@ -316,7 +318,7 @@ export default function Game() {
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth / window.innerHeight);
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
     window.addEventListener('resize', handleResize);
 
@@ -329,7 +331,7 @@ export default function Game() {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [gameState, studentsCollected, totalStudents]);
+  }, [gameState, studentsCollected, totalStudents, toast]);
 
   const startGame = () => {
     setScore(0);
@@ -374,7 +376,3 @@ export default function Game() {
     </div>
   );
 }
-
-    
-
-    
