@@ -3,9 +3,20 @@
 import * as React from "react";
 import * as THREE from "three";
 import Image from "next/image";
+import Link from "next/link";
 import { ControlsGuide } from "./ControlsGuide";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops, createMountains } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
@@ -252,7 +263,29 @@ export default function Game() {
             <CardContent className="p-4">
                 <h2 className="text-3xl font-bold font-headline mb-2">Shree Ambika Secondary School</h2>
                 <p className="text-muted-foreground mb-6">Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!</p>
-                <Button onClick={startGame} size="lg" className="text-lg">Start Driving</Button>
+                <div className="flex justify-center gap-4">
+                  <Button onClick={startGame} size="lg" className="text-lg">Start Driving</Button>
+                   <Link href="/leaderboard">
+                    <Button size="lg" variant="secondary" className="text-lg">Leaderboard</Button>
+                  </Link>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="secondary" size="lg" className="text-lg">About</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>About Hemja Highway Hero</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This game is a 3D bus driving simulator.
+                          Developed with ❤️ using Next.js and Three.js.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction>Got it!</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
             </CardContent>
           </Card>
         </div>
@@ -261,10 +294,16 @@ export default function Game() {
       {gameState === 'finished' && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
           <Card className="max-w-md p-6 text-center">
-            <h2 className="text-2xl font-bold font-headline mb-2">Mission Accomplished!</h2>
-            <p className="text-muted-foreground mb-4">You have safely transported all the students. Great job!</p>
-            <p className="text-xl font-bold mb-4">Final Score: {score}</p>
-            <Button onClick={restartGame} size="lg">Play Again</Button>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold font-headline mb-2">Mission Accomplished!</CardTitle>
+              <CardDescription className="text-muted-foreground mb-4">You have safely transported all the students. Great job!</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xl font-bold mb-4">Final Score: {score}</p>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={restartGame} size="lg" className="w-full">Play Again</Button>
+            </CardFooter>
           </Card>
         </div>
       )}
