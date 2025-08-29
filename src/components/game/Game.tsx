@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops, createZebraCross, createFlowers, createRoadSigns } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
+import { RefreshCw } from "lucide-react";
 
 const COACH_TIPS = [
   "Keep a safe distance from other vehicles.",
@@ -351,6 +352,12 @@ export default function Game() {
        <div ref={mountRef} className="absolute inset-0 z-0" />
       {gameState === 'playing' ? (
         <>
+          <div className="absolute top-4 left-4 z-20">
+             <Button onClick={startGame} variant="outline" size="icon">
+                <RefreshCw className="h-4 w-4"/>
+                <span className="sr-only">Restart Game</span>
+              </Button>
+          </div>
           <header className="absolute top-0 left-0 right-0 z-20 flex justify-center p-4">
             <h1 className="text-2xl md:text-4xl font-bold font-headline text-center bg-primary/80 text-primary-foreground py-2 px-6 rounded-lg shadow-lg backdrop-blur-sm whitespace-nowrap">
               Hemja Highway Hero
@@ -379,7 +386,3 @@ export default function Game() {
     </div>
   );
 }
-
-    
-
-    
