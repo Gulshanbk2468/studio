@@ -616,7 +616,7 @@ export function createSchool(): THREE.Group {
     for(let j=0; j<3; j++) { // 3 floors
         for(let i=0; i<6; i++){ // 6 windows on main building
             const window = (i % 2 === 0) ? createWindow(2.5, 3, 0.3) : createWindow(1.8, 3.5, 0.3);
-            window.position.set(-15 + i * 6, 4 + j * 5, -48.9);
+            window.position.set(-15 + i * 6, 2.5 + j * 5, -48.9);
             school.add(window);
         }
         for(let i=0; i<5; i++){ // 5 windows on each wing
