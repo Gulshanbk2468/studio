@@ -100,8 +100,8 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    bus.position.set(12 + 190, 0.5, -50 + 15);
-    bus.rotation.y = Math.PI;
+    bus.position.set(212, 0.5, -40);
+    bus.rotation.y = Math.PI/2;
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
@@ -157,7 +157,7 @@ export default function Game() {
         moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
 
         if(Math.abs(moveSpeed) > 0.1) {
-            const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
+            const turnDirection = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
             bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
@@ -174,13 +174,13 @@ export default function Game() {
         const SUB_ROAD_Z_MIN = -55;
         
         const SCHOOL_COMPOUND_X_MAX = 12 + 200 + 35;
-        const SCHOOL_COMPOUND_X_MIN = 12;
-        const SCHOOL_COMPOUND_Z_MAX = 10;
-        const SCHOOL_COMPOUND_Z_MIN = -110;
+        const SCHOOL_COMPOUND_X_MIN = 12 + 200 - 35;
+        const SCHOOL_COMPOUND_Z_MAX = -45 + 60;
+        const SCHOOL_COMPOUND_Z_MIN = -45 - 60;
 
         let inSchoolCompound = bus.position.x >= SCHOOL_COMPOUND_X_MIN && bus.position.x <= SCHOOL_COMPOUND_X_MAX &&
                                 bus.position.z >= SCHOOL_COMPOUND_Z_MIN && bus.position.z <= SCHOOL_COMPOUND_Z_MAX;
-
+        
         let onMainHighway = bus.position.x >= MAIN_HIGHWAY_X_MIN && bus.position.x <= MAIN_HIGHWAY_X_MAX &&
                              bus.position.z >= MAIN_HIGHWAY_Z_MIN && bus.position.z <= MAIN_HIGHWAY_Z_MAX;
         
@@ -197,8 +197,12 @@ export default function Game() {
               bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
               bus.position.z = Math.max(SUB_ROAD_Z_MIN, Math.min(SUB_ROAD_Z_MAX, bus.position.z));
           } else if (inSchoolCompound) {
-              bus.position.x = Math.max(SCHOOL_COMPOUND_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX, bus.position.x));
-              bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
+            const school_x_min = 12 + 200 - 35;
+            const school_x_max = 12 + 200 + 35;
+            const school_z_min = -50 - 55;
+            const school_z_max = -50 + 55;
+            bus.position.x = Math.max(school_x_min, Math.min(school_x_max, bus.position.x));
+            bus.position.z = Math.max(school_z_min, Math.min(school_z_max, bus.position.z));
           }
         }
 
@@ -258,7 +262,7 @@ export default function Game() {
         });
 
         // Finish condition
-        if(studentsCollected === totalStudents && bus.position.x > 12 + 190 - 25) {
+        if(studentsCollected === totalStudents && bus.position.x > 212 - 25 && bus.position.z < -45 && bus.position.z > -55) {
           addLog("Mission Accomplished! You can continue driving.");
           setCoachMessage("Mission Accomplished! You can continue driving.");
         }
