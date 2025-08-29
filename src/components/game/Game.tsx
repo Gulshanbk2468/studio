@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops, createMountains } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createZebraCross, createTrees, createShops } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -110,7 +110,6 @@ export default function Game() {
     scene.add(createTrees());
     scene.add(createShops());
     scene.add(createSchool());
-    scene.add(createMountains());
     
     const initialStudents = createStudents();
     studentsRef.current = initialStudents;
@@ -248,46 +247,57 @@ export default function Game() {
       )}
 
       {gameState === 'menu' && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md animate-fade-in">
-          <Card className="max-w-xl p-4 text-center shadow-2xl">
-            <CardHeader className="p-2">
-                <Image 
-                    src="https://picsum.photos/800/400" 
-                    width={800} 
-                    height={400} 
-                    alt="Shree Ambika Secondary School"
-                    data-ai-hint="school building" 
-                    className="rounded-t-lg"
-                />
-            </CardHeader>
-            <CardContent className="p-4">
-                <h2 className="text-3xl font-bold font-headline mb-2">Shree Ambika Secondary School</h2>
-                <p className="text-muted-foreground mb-6">Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!</p>
-                <div className="flex justify-center gap-4">
-                  <Button onClick={startGame} size="lg" className="text-lg">Start Driving</Button>
-                   <Link href="/leaderboard">
-                    <Button size="lg" variant="secondary" className="text-lg">Leaderboard</Button>
-                  </Link>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="secondary" size="lg" className="text-lg">About</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>About Hemja Highway Hero</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This game is a 3D bus driving simulator.
-                          Developed with ❤️ using Next.js and Three.js.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogAction>Got it!</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-            </CardContent>
-          </Card>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/50 animate-fade-in">
+             <div className="w-full max-w-4xl mx-auto">
+                <Card className="grid grid-cols-1 md:grid-cols-2 overflow-hidden shadow-2xl border-4 border-primary/50">
+                    <CardHeader className="p-0 relative">
+                        <Image 
+                            src="https://picsum.photos/800/600" 
+                            width={800} 
+                            height={600} 
+                            alt="Shree Ambika Secondary School"
+                            data-ai-hint="school bus" 
+                            className="object-cover w-full h-full"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    </CardHeader>
+                    <div className="flex flex-col justify-center p-8 bg-card">
+                        <CardTitle className="text-4xl font-bold font-headline mb-4 text-primary">
+                            Shree Ambika Secondary School
+                        </CardTitle>
+                        <CardDescription className="text-lg text-muted-foreground mb-8">
+                            Your mission: Safely pick up all the students and bring them back to school. Avoid obstacles and drive carefully!
+                        </CardDescription>
+                        <CardContent className="p-0 flex flex-col gap-4">
+                             <Button onClick={startGame} size="lg" className="w-full text-lg py-6">
+                                Start Driving
+                            </Button>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Link href="/leaderboard" className="w-full">
+                                    <Button size="lg" variant="secondary" className="w-full text-lg">Leaderboard</Button>
+                                </Link>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="secondary" size="lg" className="w-full text-lg">About</Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                        <AlertDialogTitle>About Hemja Highway Hero</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This game is a 3D bus driving simulator.
+                                            Developed with ❤️ using Next.js and Three.js.
+                                        </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                        <AlertDialogAction>Got it!</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                        </CardContent>
+                    </div>
+                </Card>
+            </div>
         </div>
       )}
 
