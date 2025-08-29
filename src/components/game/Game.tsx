@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -37,7 +38,7 @@ export default function Game() {
   const [coachMessage, setCoachMessage] = React.useState("");
   const [infractionCount, setInfractionCount] = React.useState(0);
   
-  const [gameState, setGameState] = React.useState<"menu" | "playing" | "finished">("menu");
+  const [gameState, setGameState] = React.useState<"menu" | "playing">("menu");
   
   const studentsRef = React.useRef<THREE.Mesh[]>([]);
   const [studentsCollected, setStudentsCollected] = React.useState(0);
@@ -112,7 +113,9 @@ export default function Game() {
     scene.add(createTrees());
     scene.add(createShops());
     scene.add(createSchool());
-    scene.add(createZebraCross());
+    
+    const zebraCrossings = [createZebraCross(-150), createZebraCross(-350)];
+    zebraCrossings.forEach(z => scene.add(z));
     
     const initialStudents = createStudents();
     studentsRef.current = initialStudents;
@@ -134,6 +137,7 @@ export default function Game() {
 
     let animationFrameId: number;
     const clock = new THREE.Clock();
+    let missionAccomplished = false;
 
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
@@ -161,7 +165,7 @@ export default function Game() {
       // Obstacle logic
       obstacles.forEach((obstacle, i) => {
         if (obstacle.userData.type && ['car', 'bike', 'truck', 'bicycle'].includes(obstacle.userData.type)) {
-            const speed = delta * obstacle.userData.speed * (obstacle.userData.direction === -1 ? -1 : 1);
+            const speed = delta * obstacle.userData.speed * (obstacle.userData.direction === -1 ? 1 : -1);
             obstacle.position.z += speed;
             
             if (obstacle.userData.direction === 1 && obstacle.position.z > 20) { // Moving towards start
@@ -174,7 +178,7 @@ export default function Game() {
         obstacleBoxes[i].setFromObject(obstacle);
         if (busBox.intersectsBox(obstacleBoxes[i])) {
             handleInfraction(obstacle.name);
-            obstacle.position.z += 20 * (obstacle.userData.direction === 1 ? 1 : -1); // Move away to prevent multiple hits
+            obstacle.position.z += 20 * (obstacle.userData.direction === 1 ? -1 : 1); // Move away to prevent multiple hits
         }
       });
 
@@ -185,9 +189,10 @@ export default function Game() {
           if (busSpeed < 0.1) {
             studentsRef.current[i].visible = false;
             setScore(s => s + 10);
+            const newStudentsCollected = studentsCollected + 1;
             setStudentsCollected(c => c + 1);
             addLog(`Picked up student.`);
-            if(studentsCollected + 1 === totalStudents){
+            if(newStudentsCollected === totalStudents){
                 addLog("All students collected! Return to school.");
                 setCoachMessage("All students collected! Return to school.");
             }
@@ -196,8 +201,10 @@ export default function Game() {
       });
 
       // Finish condition
-      if(studentsCollected === totalStudents && bus.position.z > -5 && bus.position.z < 20 && bus.position.x > 15) {
-        setGameState("finished");
+      if(!missionAccomplished && studentsCollected === totalStudents && bus.position.z > -5 && bus.position.z < 20 && bus.position.x > 15) {
+        missionAccomplished = true;
+        addLog("Mission Accomplished! You can continue driving.");
+        setCoachMessage("Mission Accomplished! You can continue driving.");
       }
 
       renderer.render(scene, camera);
@@ -281,23 +288,6 @@ export default function Game() {
                     </div>
                 </Card>
             </div>
-        </div>
-      )}
-
-      {gameState === 'finished' && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-md">
-          <Card className="max-w-md p-6 text-center">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold font-headline mb-2">Mission Accomplished!</CardTitle>
-              <CardDescription className="text-muted-foreground mb-4">You have safely transported all the students. Great job!</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xl font-bold mb-4">Final Score: {score}</p>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={restartGame} size="lg" className="w-full">Play Again</Button>
-            </CardFooter>
-          </Card>
         </div>
       )}
 

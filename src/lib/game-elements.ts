@@ -45,7 +45,7 @@ export function createBus(): THREE.Group {
   // Grille
   const grilleGeo = new THREE.PlaneGeometry(2, 0.5);
   const grille = new THREE.Mesh(grilleGeo, black);
-  grille.position.set(0, 0.7, 5.51);
+  grille.position.set(0, 0.7, 4.51);
   bus.add(grille);
 
   // Headlights
@@ -62,7 +62,7 @@ export function createBus(): THREE.Group {
   // Taillights
   const taillightGeo = new THREE.BoxGeometry(0.2, 0.4, 0.1);
   const taillightL = new THREE.Mesh(taillightGeo, red);
-  taillightL.position.set(-1.2, 0.8, -4.51);
+  taillightL.position.set(-1.2, 0.8, -4.75);
   bus.add(taillightL);
   const taillightR = taillightL.clone();
   taillightR.position.x = 1.2;
@@ -589,8 +589,8 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
             -Math.random() * 450
         );
         vehicle.userData.speed = 10 + Math.random() * 20;
-        vehicle.userData.direction = onLeftSide ? -1 : 1; // -1 for returning, 1 for outgoing
-        if(onLeftSide) vehicle.rotation.y = Math.PI;
+        vehicle.userData.direction = onLeftSide ? 1 : -1; // -1 for returning, 1 for outgoing
+        if(!onLeftSide) vehicle.rotation.y = Math.PI;
 
         obstacles.push(vehicle);
     }
@@ -663,23 +663,18 @@ export function createSchool(): THREE.Group {
     return school;
 }
 
-export function createZebraCross(): THREE.Group {
+export function createZebraCross(z: number): THREE.Group {
     const zebraCross = new THREE.Group();
     const stripeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const stripeGeometry = new THREE.BoxGeometry(1.5, 0.02, 24);
+    const stripeGeometry = new THREE.BoxGeometry(1.5, 0.02, 10);
     for (let i = 0; i < 7; i++) {
         const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
         stripe.rotation.y = Math.PI / 2;
-        stripe.position.z = 50 - i * 2.5;
+        stripe.position.x = -3 + i * 2.5;
         zebraCross.add(stripe);
     }
-    zebraCross.position.z = -450;
+    zebraCross.position.z = z;
+    zebraCross.position.x = 12.5;
     return zebraCross;
 }
     
-
-    
-
-
-
-
