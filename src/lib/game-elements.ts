@@ -1,5 +1,4 @@
 
-
 import * as THREE from 'three';
 
 // Create the school bus
@@ -373,10 +372,7 @@ export function createScenery(): THREE.Group {
   ground.position.y = -0.01;
   ground.position.z = 0;
   scenery.add(ground);
-
-  const allShops = createShops();
-  allShops.forEach(shop => scenery.add(shop));
-
+  
   return scenery;
 }
 
@@ -605,10 +601,6 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
 // Create the school compound
 export function createSchool(): THREE.Group {
     const school = new THREE.Group();
-    // Position the school at the end of the sub-road
-    school.position.x = 12 + 200;
-    school.position.z = -50;
-    school.rotation.y = -Math.PI / 2; // Rotate to face the sub-road
 
     // Compound Wall
     const wallMat = new THREE.MeshLambertMaterial({ color: 0xFDF5E6 }); // Old Lace color
@@ -872,7 +864,5 @@ export function createRoadSigns(): THREE.Group {
     
     return signs;
 }
-
-    
 
     

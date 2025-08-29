@@ -109,7 +109,11 @@ export default function Game() {
     scene.add(createTrees());
     
     const school = createSchool();
+    school.position.x = 12 + 200;
+    school.position.z = -50;
+    school.rotation.y = -Math.PI/2;
     scene.add(school);
+
     const gateLeft = school.getObjectByName('gateLeft');
     const gateRight = school.getObjectByName('gateRight');
 
