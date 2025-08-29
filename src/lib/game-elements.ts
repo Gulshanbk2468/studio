@@ -160,16 +160,14 @@ export function createRoadMarkings(): THREE.Group {
     const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const lineGeometry = new THREE.BoxGeometry(0.2, 0.01, 3);
     
-    // 3 lanes on each side means 2 dividing lines per side.
-    for (let j = -2; j <= 2; j++) {
-      if (j === 0) continue; // Center is open
-      for (let i = 0; i < 60; i++) {
-          const line = new THREE.Mesh(lineGeometry, lineMaterial);
-          line.position.z = -i * 8;
-          line.position.x = j * 4;
-          markings.add(line);
-      }
+    // Center dashed lines
+    for (let i = 0; i < 60; i++) {
+        const line = new THREE.Mesh(lineGeometry, lineMaterial);
+        line.position.z = -i * 8;
+        line.position.x = 0; // Center of the 24-width road
+        markings.add(line);
     }
+    
     markings.position.z = -20;
     return markings;
 }
@@ -672,7 +670,7 @@ export function createZebraCross(): THREE.Group {
     for (let i = 0; i < 7; i++) {
         const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
         stripe.rotation.y = Math.PI / 2;
-        stripe.position.z = 50 - i * 2.5; // Starts after 500m (since road starts at z=50 and goes to -450)
+        stripe.position.z = 50 - i * 2.5;
         zebraCross.add(stripe);
     }
     zebraCross.position.z = -450;
@@ -681,6 +679,7 @@ export function createZebraCross(): THREE.Group {
     
 
     
+
 
 
 

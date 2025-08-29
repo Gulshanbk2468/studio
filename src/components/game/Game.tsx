@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops } from "@/lib/game-elements";
+import { createBus, createRoad, createScenery, createStudents, createObstacles, createSchool, createRoadMarkings, createTrees, createShops, createZebraCross } from "@/lib/game-elements";
 import { useToast } from "@/hooks/use-toast";
 
 const COACH_TIPS = [
@@ -112,6 +112,7 @@ export default function Game() {
     scene.add(createTrees());
     scene.add(createShops());
     scene.add(createSchool());
+    scene.add(createZebraCross());
     
     const initialStudents = createStudents();
     studentsRef.current = initialStudents;
