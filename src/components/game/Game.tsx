@@ -78,7 +78,7 @@ export default function Game() {
     const scene = new THREE.Scene();
     const sunriseColor = 0x87CEEB; // Light sky blue for daytime
     scene.background = new THREE.Color(sunriseColor);
-    scene.fog = new THREE.Fog(sunriseColor, 150, 400);
+    scene.fog = new THREE.Fog(sunriseColor, 150, 600);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     
@@ -100,9 +100,9 @@ export default function Game() {
     // Game elements
     const bus = createBus();
     scene.add(bus);
-    bus.position.x = 20;
-    bus.position.z = 10;
-    bus.rotation.y = -Math.PI / 2;
+    bus.position.set(20, 0, 480);
+    bus.rotation.y = Math.PI;
+
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
@@ -111,7 +111,7 @@ export default function Game() {
     scene.add(createShops());
     scene.add(createSchool());
     
-    const zebraCrossings = [createZebraCross(-150), createZebraCross(-350), createZebraCross(-50)];
+    const zebraCrossings = [createZebraCross(-150), createZebraCross(-350), createZebraCross(50)];
     zebraCrossings.forEach(z => scene.add(z));
     
     const initialStudents = createStudents();
@@ -150,8 +150,12 @@ export default function Game() {
         if (keysPressed['arrowright']) bus.rotation.y -= turnSpeed;
         
         // Keep bus on road
-        bus.position.x = Math.max(-12, Math.min(30, bus.position.x));
-        bus.position.z = Math.max(-490, Math.min(20, bus.position.z));
+        if (bus.position.z < 10 && bus.position.z > -510) { // On main highway
+          bus.position.x = Math.max(-12, Math.min(12, bus.position.x));
+        } else if (bus.position.z >= 10) { // On sub-road
+           bus.position.x = Math.max(15, Math.min(25, bus.position.x));
+        }
+        bus.position.z = Math.max(-510, Math.min(490, bus.position.z));
         
         // Camera follow
         const offset = new THREE.Vector3(0, 7, 12);
@@ -159,7 +163,7 @@ export default function Game() {
         camera.position.lerp(bus.position.clone().add(offset), 0.1);
         camera.lookAt(bus.position);
       } else { // Menu animation
-        camera.position.set(10 + Math.sin(time * 0.2) * 5, 5, 25 + Math.cos(time * 0.2) * 5);
+        camera.position.set(10 + Math.sin(time * 0.2) * 5, 5, 495 + Math.cos(time * 0.2) * 5);
         camera.lookAt(bus.position);
       }
 
@@ -173,8 +177,8 @@ export default function Game() {
             obstacle.position.z += speed;
             
             if (obstacle.userData.direction === 1 && obstacle.position.z > 20) { // Moving towards start
-                obstacle.position.z = -490;
-            } else if (obstacle.userData.direction === -1 && obstacle.position.z < -490) { // Moving away from start
+                obstacle.position.z = -510;
+            } else if (obstacle.userData.direction === -1 && obstacle.position.z < -510) { // Moving away from start
                 obstacle.position.z = 20;
             }
         }
@@ -208,7 +212,7 @@ export default function Game() {
         });
 
         // Finish condition
-        if(studentsCollected === totalStudents && bus.position.z > -5 && bus.position.z < 20 && bus.position.x > 15) {
+        if(studentsCollected === totalStudents && bus.position.z > 480 && bus.position.x > 15) {
           addLog("Mission Accomplished! You can continue driving.");
           setCoachMessage("Mission Accomplished! You can continue driving.");
         }
@@ -236,7 +240,7 @@ export default function Game() {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [gameState, studentsCollected, totalStudents]);
 
   const startGame = () => {
     setScore(0);

@@ -5,7 +5,7 @@ import * as THREE from 'three';
 export function createBus(): THREE.Group {
   const bus = new THREE.Group();
   bus.name = "bus";
-  bus.position.y = 0.5;
+  bus.position.y = 1.0;
 
   const busYellow = new THREE.MeshStandardMaterial({ color: 0xE2A900, roughness: 0.3, metalness: 0.2 });
   const black = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.5 });
@@ -144,14 +144,28 @@ export function createBus(): THREE.Group {
 
 
 // Create the road
-export function createRoad(): THREE.Mesh {
-  const roadLength = 500;
-  const roadGeometry = new THREE.PlaneGeometry(24, roadLength);
+export function createRoad(): THREE.Group {
+  const roadGroup = new THREE.Group();
   const roadMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
-  const road = new THREE.Mesh(roadGeometry, roadMaterial);
-  road.rotation.x = -Math.PI / 2;
-  road.position.z = -roadLength / 2 + 50;
-  return road;
+
+  // Main Highway
+  const mainRoadLength = 520;
+  const mainRoadGeometry = new THREE.PlaneGeometry(24, mainRoadLength);
+  const mainRoad = new THREE.Mesh(mainRoadGeometry, roadMaterial);
+  mainRoad.rotation.x = -Math.PI / 2;
+  mainRoad.position.z = -mainRoadLength / 2 + 10;
+  roadGroup.add(mainRoad);
+
+  // Sub-road to school
+  const subRoadLength = 500;
+  const subRoadGeometry = new THREE.PlaneGeometry(10, subRoadLength);
+  const subRoad = new THREE.Mesh(subRoadGeometry, roadMaterial);
+  subRoad.rotation.x = -Math.PI / 2;
+  subRoad.position.x = 20;
+  subRoad.position.z = subRoadLength / 2 + 10;
+  roadGroup.add(subRoad);
+
+  return roadGroup;
 }
 
 // Create road markings
@@ -160,15 +174,15 @@ export function createRoadMarkings(): THREE.Group {
     const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const lineGeometry = new THREE.BoxGeometry(0.2, 0.01, 3);
     
-    // Center dashed lines
-    for (let i = 0; i < 60; i++) {
+    // Center dashed lines for main highway
+    for (let i = 0; i < 65; i++) {
         const line = new THREE.Mesh(lineGeometry, lineMaterial);
         line.position.z = -i * 8;
         line.position.x = 0; // Center of the 24-width road
         markings.add(line);
     }
     
-    markings.position.z = -20;
+    markings.position.z = -10;
     return markings;
 }
 
@@ -319,13 +333,16 @@ export function createTrees(): THREE.Group {
 
     const treeTypes = [createPineTree, createDeciduousTree];
   
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 120; i++) {
       const treeTypeIndex = Math.floor(Math.random() * treeTypes.length);
       const tree = treeTypes[treeTypeIndex]();
   
       const onLeftSide = Math.random() > 0.5;
-      tree.position.x = onLeftSide ? -18 - Math.random() * 20 : 18 + Math.random() * 20;
+      tree.position.x = onLeftSide ? -18 - Math.random() * 40 : 18 + Math.random() * 40;
       tree.position.z = -i * 8 - Math.random() * 8;
+
+      if(tree.position.x > -15 && tree.position.x < 15) continue; // Avoid trees on the road
+
       trees.add(tree);
     }
     return trees;
@@ -388,20 +405,20 @@ export function createScenery(): THREE.Group {
 
   // Ground with Terraced Fields
   const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 }); // ForestGreen
-  const groundGeometry = new THREE.PlaneGeometry(500, 500);
+  const groundGeometry = new THREE.PlaneGeometry(800, 1000);
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
   ground.rotation.x = -Math.PI / 2;
   ground.position.y = -0.01;
-  ground.position.z = -200;
+  ground.position.z = 0;
   scenery.add(ground);
 
   // Terraced Fields
   const terraceMat = new THREE.MeshLambertMaterial({ color: 0x3CB371 }); // MediumSeaGreen
-  for(let i = 0; i < 10; i++) {
-      const terraceGeo = new THREE.BoxGeometry(80 + Math.random()*40, 0.5, 20 + Math.random()*10);
+  for(let i = 0; i < 20; i++) {
+      const terraceGeo = new THREE.BoxGeometry(120 + Math.random()*80, 0.5, 30 + Math.random()*15);
       const terrace = new THREE.Mesh(terraceGeo, terraceMat);
       const onLeftSide = Math.random() > 0.5;
-      terrace.position.x = onLeftSide ? -60 - Math.random()*20 : 60 + Math.random()*20;
+      terrace.position.x = onLeftSide ? -100 - Math.random()*40 : 100 + Math.random()*40;
       terrace.position.y = i * 0.2;
       terrace.position.z = -i * 50 - Math.random() * 20;
       scenery.add(terrace);
@@ -578,7 +595,7 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
     
     // Create instances
     const vehicleTypes = [createCar, createMotorbike, createTruck, createBicycle];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
         const typeIndex = Math.floor(Math.random() * vehicleTypes.length);
         const vehicle = vehicleTypes[typeIndex]();
         const onLeftSide = Math.random() > 0.5;
@@ -586,7 +603,7 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         vehicle.position.set(
             onLeftSide ? -6 : 6, 
             0, 
-            -Math.random() * 450
+            -Math.random() * 500
         );
         vehicle.userData.speed = 10 + Math.random() * 20;
         vehicle.userData.direction = onLeftSide ? 1 : -1; // -1 for returning, 1 for outgoing
@@ -595,9 +612,10 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         obstacles.push(vehicle);
     }
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       const cow = createCow();
-      cow.position.set((Math.random()-0.5)*16, 0, -100 - i * 150);
+      cow.position.set((Math.random()-0.5)*30, 0, -100 - i * 150 * Math.random());
+      if(cow.position.x > -15 && cow.position.x < 15) continue;
       obstacles.push(cow);
     }
   
@@ -607,56 +625,91 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
 // Create the school compound
 export function createSchool(): THREE.Group {
     const school = new THREE.Group();
+    school.position.x = 20;
+    school.position.z = 500;
+
 
     // Compound Wall
     const wallMat = new THREE.MeshLambertMaterial({ color: 0xD2B48C }); // Tan
-    const wallGeo = new THREE.BoxGeometry(0.2, 4, 30);
-    const backWall = new THREE.Mesh(wallGeo, wallMat);
-    backWall.position.set(35, 2, 5);
+    const wallGeoSide = new THREE.BoxGeometry(0.2, 4, 40);
+    const rightWall = new THREE.Mesh(wallGeoSide, wallMat);
+    rightWall.position.set(15, 2, -20);
+    school.add(rightWall);
+    
+    const leftWall = new THREE.Mesh(wallGeoSide, wallMat);
+    leftWall.position.set(-15, 2, -20);
+    school.add(leftWall);
+
+    const wallGeoBack = new THREE.BoxGeometry(30, 4, 0.2);
+    const backWall = new THREE.Mesh(wallGeoBack, wallMat);
+    backWall.position.set(0, 2, -40);
     school.add(backWall);
 
-    const sideWall = new THREE.Mesh(new THREE.BoxGeometry(20, 4, 0.2), wallMat);
-    sideWall.position.set(25, 2, 20);
-    school.add(sideWall);
-    const sideWall2 = sideWall.clone();
-    sideWall2.position.z = -10;
-    school.add(sideWall2);
+    // School Building (L-shape)
+    const buildingMat = new THREE.MeshStandardMaterial({color: 0xF5DEB3, roughness: 0.8});
+    const mainBuilding = new THREE.Mesh(new THREE.BoxGeometry(25, 12, 8), buildingMat);
+    mainBuilding.position.set(0, 6, -35);
+    school.add(mainBuilding);
 
-    // School Building (simplified)
-    const building = new THREE.Mesh(new THREE.BoxGeometry(15, 10, 8), wallMat);
-    building.position.set(28, 5, 5);
-    school.add(building);
+    const wingBuilding = new THREE.Mesh(new THREE.BoxGeometry(8, 12, 20), buildingMat);
+    wingBuilding.position.set(-8.5, 6, -23);
+    school.add(wingBuilding);
+
+    // Windows
+    const windowMat = new THREE.MeshLambertMaterial({color: 0x444444});
+    const windowGeo = new THREE.BoxGeometry(1.5, 2, 0.1);
+    for(let j=0; j<2; j++) {
+        for(let i=0; i<5; i++){
+            const window = new THREE.Mesh(windowGeo, windowMat);
+            window.position.set(-10 + i * 4.5, 3 + j * 5, -30.9);
+            school.add(window);
+        }
+    }
+
 
     // Gate
     const gate = new THREE.Group();
     const postMat = new THREE.MeshLambertMaterial({ color: 0x808080 }); // Gray
     const postGeo = new THREE.BoxGeometry(0.5, 5, 0.5);
     const post1 = new THREE.Mesh(postGeo, postMat);
-    post1.position.set(15, 2.5, 20.25);
+    post1.position.set(-10, 2.5, 0);
     gate.add(post1);
     
     const post2 = post1.clone();
-    post2.position.x = 25;
+    post2.position.x = 10;
     gate.add(post2);
+
+    const gateBarMat = new THREE.MeshLambertMaterial({color: 0x555555});
+    const gateBarGeo = new THREE.BoxGeometry(9.5, 0.2, 0.2);
+    for(let i=0; i < 10; i++){
+        const barL = new THREE.Mesh(gateBarGeo, gateBarMat);
+        barL.position.set(-5, 0.6 + i*0.4, 0);
+        gate.add(barL);
+        const barR = barL.clone();
+        barR.position.x = 5;
+        gate.add(barR);
+    }
+    gate.position.z = 0.5;
+
 
     // Gate Sign
     const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 128;
+    canvas.width = 1024;
+    canvas.height = 256;
     const context = canvas.getContext('2d');
     if (context) {
         context.fillStyle = '#003366';
-        context.fillRect(0,0,512,128);
+        context.fillRect(0,0,1024,256);
         context.fillStyle = 'white';
-        context.font = 'bold 32px "PT Sans"';
+        context.font = 'bold 64px "PT Sans"';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
-        context.fillText('Shree Ambika Secondary School', 256, 64);
+        context.fillText('Shree Ambika Secondary School', 512, 128);
     }
     const texture = new THREE.CanvasTexture(canvas);
     const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(10, 2), signMaterial);
-    sign.position.set(20, 5.5, 20.25);
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(20, 4), signMaterial);
+    sign.position.set(0, 5.5, 0);
     gate.add(sign);
 
     school.add(gate);
@@ -674,7 +727,7 @@ export function createZebraCross(z: number): THREE.Group {
         zebraCross.add(stripe);
     }
     zebraCross.position.z = z;
-    zebraCross.position.x = 12.5;
+    zebraCross.position.x = 0;
     return zebraCross;
 }
     
