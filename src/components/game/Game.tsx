@@ -100,7 +100,7 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    bus.position.set(212, 0.5, -90);
+    bus.position.set(0, 0.5, 0);
     bus.rotation.y = 0;
 
     scene.add(createRoad());
@@ -156,7 +156,7 @@ export default function Game() {
       const time = clock.getElapsedTime();
 
       if (gameState === "playing") {
-        const moveDirection = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
+        const moveDirection = (keysPressed['arrowup'] ? 1 : 0) - (keysPressed['arrowdown'] ? 1 : 0);
         if (moveDirection !== 0) {
             moveSpeed += moveDirection * acceleration * delta;
         } else {
@@ -166,11 +166,11 @@ export default function Game() {
 
 
         if(Math.abs(moveSpeed) > 0.1) {
-            const turnDirection = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
+            const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
             bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
-        bus.translateZ(moveSpeed * delta);
+        bus.translateZ(-moveSpeed * delta);
 
         const MAIN_HIGHWAY_X_MAX = 12;
         const MAIN_HIGHWAY_X_MIN = -12;
@@ -229,7 +229,7 @@ export default function Game() {
 
 
         // Camera follow
-        const offset = new THREE.Vector3(0, 7, -12); // Camera behind the bus
+        const offset = new THREE.Vector3(0, 7, 12); // Camera behind the bus
         offset.applyQuaternion(bus.quaternion);
         camera.position.lerp(bus.position.clone().add(offset), 0.1);
         camera.lookAt(bus.position);
