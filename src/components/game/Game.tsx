@@ -151,22 +151,21 @@ export default function Game() {
       const time = clock.getElapsedTime();
 
       if (gameState === "playing") {
-
-        if (keysPressed['arrowup']) {
-          moveSpeed += acceleration * delta;
-        } else if (keysPressed['arrowdown']) {
-          moveSpeed -= acceleration * delta;
+        const moveDirection = (keysPressed['arrowup'] ? 1 : 0) - (keysPressed['arrowdown'] ? 1 : 0);
+        if (moveDirection !== 0) {
+            moveSpeed += moveDirection * acceleration * delta;
         } else {
             moveSpeed *= deceleration;
         }
         moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
-        
+
         if(Math.abs(moveSpeed) > 0.1) {
             const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
-            bus.rotation.y += turnDirection * turnSpeed * delta * (moveSpeed > 0 ? 1 : -1);
+            bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
-        bus.translateZ(-moveSpeed * delta);
+        bus.translateZ(moveSpeed * delta);
+
 
         const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 35;
         const SCHOOL_COMPOUND_X_MIN = 12;
@@ -182,21 +181,22 @@ export default function Game() {
         const SUB_ROAD_X_MIN = 12;
         const SUB_ROAD_Z_MAX = -45;
         const SUB_ROAD_Z_MIN = -55;
+        
+        let onMainHighway = bus.position.z < MAIN_HIGHWAY_Z_MAX && bus.position.z > MAIN_HIGHWAY_Z_MIN && bus.position.x < SUB_ROAD_X_MIN + 5;
+        let onSubRoad = bus.position.x > SUB_ROAD_X_MIN - 5 && bus.position.z > SUB_ROAD_Z_MIN - 5 && bus.position.z < SUB_ROAD_Z_MAX + 5;
 
         // Road boundary logic
-        if (bus.position.z < MAIN_HIGHWAY_Z_MAX && bus.position.z > MAIN_HIGHWAY_Z_MIN && bus.position.x < SUB_ROAD_X_MIN) { // On main highway
+        if (onMainHighway) {
             bus.position.x = Math.max(MAIN_HIGHWAY_X_MIN, Math.min(MAIN_HIGHWAY_X_MAX, bus.position.x));
-        } else if (bus.position.x > SCHOOL_COMPOUND_X_MIN) { // On sub-road or in school
-            if (bus.position.z > SUB_ROAD_Z_MIN && bus.position.z < SUB_ROAD_Z_MAX) { // On sub-road
-                 bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
-            } else { // In school compound
-                 bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX - 2, bus.position.x));
-                 bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
-            }
+        } else if (onSubRoad) {
+             bus.position.x = Math.max(SUB_ROAD_X_MIN, Math.min(SUB_ROAD_X_MAX, bus.position.x));
+        } else { // In school compound
+            bus.position.x = Math.max(SCHOOL_COMPOUND_X_MIN, Math.min(SCHOOL_COMPOUND_X_MAX, bus.position.x));
+            bus.position.z = Math.max(SCHOOL_COMPOUND_Z_MIN, Math.min(SCHOOL_COMPOUND_Z_MAX, bus.position.z));
         }
-        
+
         // Camera follow
-        const offset = new THREE.Vector3(0, 7, 12);
+        const offset = new THREE.Vector3(0, 7, -12); // Camera behind the bus
         offset.applyQuaternion(bus.quaternion);
         camera.position.lerp(bus.position.clone().add(offset), 0.1);
         camera.lookAt(bus.position);
