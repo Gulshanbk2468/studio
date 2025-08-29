@@ -187,8 +187,8 @@ export function createRoadMarkings(): THREE.Group {
     return markings;
 }
 
-function createHouses(): THREE.Group {
-    const houses = new THREE.Group();
+function createHouses(): THREE.Group[] {
+    const houses: THREE.Group[] = [];
   
     // Traditional Nepali House
     const createOldNepaliHouse = () => {
@@ -200,6 +200,7 @@ function createHouses(): THREE.Group {
       const base = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 7), brickMat);
       base.position.y = 2;
       house.add(base);
+      house.name = 'House';
 
       // Pitched Roof
       const roofGeo = new THREE.BufferGeometry();
@@ -251,7 +252,7 @@ function createHouses(): THREE.Group {
       house.position.z = zPos;
       house.rotation.y = onLeftSide ? Math.PI / 2 + (Math.random()-0.5) * 0.2 : -Math.PI / 2 + (Math.random()-0.5) * 0.2;
       
-      houses.add(house);
+      houses.push(house);
     }
   
     return houses;
@@ -298,8 +299,8 @@ export function createTrees(): THREE.Group {
     return trees;
 }
 
-export function createShops(): THREE.Group {
-    const shops = new THREE.Group();
+export function createShops(): (THREE.Mesh | THREE.Group)[] {
+    const shops: (THREE.Mesh | THREE.Group)[] = [];
     const shopNames = ['Ambika Pustak Pasal', 'Bakery', 'Electronics', 'Cafe', 'Chatpate Center'];
   
     const createShop = (name: string) => {
@@ -308,6 +309,7 @@ export function createShops(): THREE.Group {
         const base = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 6), baseMat);
         base.position.y = 2.5;
         shop.add(base);
+        shop.name = 'Shop';
     
         const awningMat = new THREE.MeshLambertMaterial({ color: 0xB22222 });
         const awning = new THREE.Mesh(new THREE.BoxGeometry(8.2, 0.5, 2.5), awningMat);
@@ -343,7 +345,7 @@ export function createShops(): THREE.Group {
         shop.position.x = onLeftSide ? -20 : 20; // Move shops further from the road
         shop.position.z = -50 - i * 80 - Math.random() * 20;
         shop.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
-        shops.add(shop);
+        shops.push(shop);
     }
   
     return shops;
@@ -361,8 +363,6 @@ export function createScenery(): THREE.Group {
   ground.position.y = -0.01;
   ground.position.z = 0;
   scenery.add(ground);
-
-  scenery.add(createHouses());
 
   return scenery;
 }
@@ -533,7 +533,7 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         return cow;
     }
     
-    // Create instances
+    // Create vehicle instances
     const vehicleTypes = [createCar, createMotorbike, createTruck, createBicycle];
     for (let i = 0; i < 20; i++) {
         const typeIndex = Math.floor(Math.random() * vehicleTypes.length);
@@ -552,14 +552,22 @@ export function createObstacles(): (THREE.Mesh | THREE.Group)[] {
         obstacles.push(vehicle);
     }
 
+    // Create static animal instances
     for (let i = 0; i < 5; i++) {
       const cow = createCow();
       cow.position.set((Math.random()-0.5)*30, 0, -100 - i * 150 * Math.random());
       if(cow.position.x > -15 && cow.position.x < 15) continue;
       obstacles.push(cow);
     }
+
+    // Create static building instances
+    const allHouses = createHouses();
+    allHouses.forEach(house => obstacles.push(house));
+
+    const allShops = createShops();
+    allShops.forEach(shop => obstacles.push(shop));
   
-    return obstacles as (THREE.Mesh | THREE.Group)[];
+    return obstacles;
 }
 
 // Create the school compound
