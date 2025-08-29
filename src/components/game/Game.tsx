@@ -100,7 +100,7 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    bus.position.set(212, 0.5, -50);
+    bus.position.set(212, 0.5, -90);
     bus.rotation.y = Math.PI;
 
     scene.add(createRoad());
@@ -155,18 +155,19 @@ export default function Game() {
       if (gameState === "playing") {
         const moveDirection = (keysPressed['arrowup'] ? 1 : 0) - (keysPressed['arrowdown'] ? 1 : 0);
         if (moveDirection !== 0) {
-            moveSpeed -= moveDirection * acceleration * delta;
+            moveSpeed += moveDirection * acceleration * delta;
         } else {
             moveSpeed *= deceleration;
         }
-        moveSpeed = Math.max(-maxSpeed, Math.min(maxSpeed * 0.5, moveSpeed));
+        moveSpeed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, moveSpeed));
+
 
         if(Math.abs(moveSpeed) > 0.1) {
             const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
             bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
-        bus.translateZ(moveSpeed * delta);
+        bus.translateZ(-moveSpeed * delta);
 
         const MAIN_HIGHWAY_X_MAX = 12;
         const MAIN_HIGHWAY_X_MIN = -12;
@@ -208,7 +209,7 @@ export default function Game() {
 
         // Gate logic
         if (gateLeft && gateRight) {
-          const gateProximity = bus.position.distanceTo(school.position);
+          const gateProximity = bus.position.distanceTo(new THREE.Vector3(212, 0, 0));
           const gateOpenPosition = 10;
           const gateClosedPosition = 0;
           
@@ -300,7 +301,7 @@ export default function Game() {
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setSize(window.innerWidth / window.innerHeight);
     }
     window.addEventListener('resize', handleResize);
 
