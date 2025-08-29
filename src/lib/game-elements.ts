@@ -288,8 +288,12 @@ function createHouses(): THREE.Group {
       
       const onLeftSide = Math.random() > 0.5;
       
+      const zPos = -i * 12 - 20 - Math.random() * 5;
+      // Prevent houses near the sub-road intersection
+      if (zPos > -40 && zPos < -60) continue;
+
       house.position.x = onLeftSide ? -25 - Math.random() * 15 : 25 + Math.random() * 15;
-      house.position.z = -i * 12 - 20 - Math.random() * 5;
+      house.position.z = zPos;
       house.rotation.y = onLeftSide ? Math.PI / 2 + (Math.random()-0.5) * 0.2 : -Math.PI / 2 + (Math.random()-0.5) * 0.2;
       
       houses.add(house);
@@ -632,77 +636,95 @@ export function createSchool(): THREE.Group {
     school.rotation.y = -Math.PI / 2; // Rotate to face the sub-road
 
     // Compound Wall
-    const wallMat = new THREE.MeshLambertMaterial({ color: 0xD2B48C }); // Tan
-    const wallGeoSide = new THREE.BoxGeometry(0.2, 4, 60); // Longer walls
+    const wallMat = new THREE.MeshLambertMaterial({ color: 0xFDF5E6 }); // Old Lace color
+    const wallGeoSide = new THREE.BoxGeometry(0.4, 4, 120); // Longer and thicker walls
     const rightWall = new THREE.Mesh(wallGeoSide, wallMat);
-    rightWall.position.set(25, 2, -30);
+    rightWall.position.set(35, 2, -60);
     school.add(rightWall);
     
     const leftWall = new THREE.Mesh(wallGeoSide, wallMat);
-    leftWall.position.set(-25, 2, -30);
+    leftWall.position.set(-35, 2, -60);
     school.add(leftWall);
 
-    const wallGeoBack = new THREE.BoxGeometry(50, 4, 0.2);
+    const wallGeoBack = new THREE.BoxGeometry(70, 4, 0.4);
     const backWall = new THREE.Mesh(wallGeoBack, wallMat);
-    backWall.position.set(0, 2, -60);
+    backWall.position.set(0, 2, -120);
     school.add(backWall);
 
     // School Building (U-shape for more realism)
-    const buildingMat = new THREE.MeshStandardMaterial({color: 0xF5DEB3, roughness: 0.8});
-    const mainBuilding = new THREE.Mesh(new THREE.BoxGeometry(30, 12, 10), buildingMat);
-    mainBuilding.position.set(0, 6, -50);
+    const buildingMat = new THREE.MeshStandardMaterial({color: 0xADD8E6, roughness: 0.8}); // Light Blue
+    const mainBuilding = new THREE.Mesh(new THREE.BoxGeometry(40, 15, 12), buildingMat);
+    mainBuilding.position.set(0, 7.5, -55);
     school.add(mainBuilding);
 
-    const leftWing = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 30), buildingMat);
-    leftWing.position.set(-15, 6, -35);
+    const leftWing = new THREE.Mesh(new THREE.BoxGeometry(12, 15, 40), buildingMat);
+    leftWing.position.set(-20, 7.5, -35);
     school.add(leftWing);
     
-    const rightWing = new THREE.Mesh(new THREE.BoxGeometry(10, 12, 30), buildingMat);
-    rightWing.position.set(15, 6, -35);
+    const rightWing = new THREE.Mesh(new THREE.BoxGeometry(12, 15, 40), buildingMat);
+    rightWing.position.set(20, 7.5, -35);
     school.add(rightWing);
 
     // Windows
-    const windowMat = new THREE.MeshLambertMaterial({color: 0x444444});
-    const windowGeo = new THREE.BoxGeometry(1.5, 2, 0.2);
-    for(let j=0; j<2; j++) { // 2 floors
-        for(let i=0; i<6; i++){ // 6 windows on main building
-            const window = new THREE.Mesh(windowGeo, windowMat);
-            window.position.set(-12.5 + i * 5, 4 + j * 5, -44.9);
-            school.add(window);
+    const windowFrameMat = new THREE.MeshLambertMaterial({color: 0xFFFFFF});
+    const windowGlassMat = new THREE.MeshLambertMaterial({color: 0x87CEEB, transparent: true, opacity: 0.7});
+    const windowGeo = new THREE.BoxGeometry(2, 2.5, 0.3);
+    const glassGeo = new THREE.PlaneGeometry(1.8, 2.3);
+
+    for(let j=0; j<3; j++) { // 3 floors
+        for(let i=0; i<7; i++){ // 7 windows on main building
+            const window = new THREE.Mesh(windowGeo, windowFrameMat);
+            const glass = new THREE.Mesh(glassGeo, windowGlassMat);
+            window.position.set(-18 + i * 6, 4 + j * 5, -48.9);
+            glass.position.set(window.position.x, window.position.y, window.position.z + 0.16);
+            school.add(window, glass);
         }
-        for(let i=0; i<5; i++){ // 5 windows on each wing
-            const windowL = new THREE.Mesh(windowGeo, windowMat);
+        for(let i=0; i<6; i++){ // 6 windows on each wing
+            const windowL = new THREE.Mesh(windowGeo, windowFrameMat);
+            const glassL = new THREE.Mesh(glassGeo, windowGlassMat);
             windowL.rotation.y = Math.PI / 2;
-            windowL.position.set(-20.1, 4 + j * 5, -45 + i * 5);
-            school.add(windowL);
-            const windowR = new THREE.Mesh(windowGeo, windowMat);
+            glassL.rotation.y = Math.PI / 2;
+            windowL.position.set(-26.1, 4 + j * 5, -45 + i * 6);
+            glassL.position.set(windowL.position.x + 0.16, windowL.position.y, windowL.position.z);
+            school.add(windowL, glassL);
+
+            const windowR = new THREE.Mesh(windowGeo, windowFrameMat);
+            const glassR = new THREE.Mesh(glassGeo, windowGlassMat);
             windowR.rotation.y = -Math.PI / 2;
-            windowR.position.set(20.1, 4 + j * 5, -45 + i * 5);
-            school.add(windowR);
+            glassR.rotation.y = -Math.PI / 2;
+            windowR.position.set(26.1, 4 + j * 5, -45 + i * 6);
+            glassR.position.set(windowR.position.x - 0.16, windowR.position.y, windowR.position.z);
+            school.add(windowR, glassR);
         }
     }
+    
+    // Door
+    const doorMat = new THREE.MeshLambertMaterial({color: 0x8B4513});
+    const door = new THREE.Mesh(new THREE.BoxGeometry(4, 6, 0.4), doorMat);
+    door.position.set(0, 3, -48.8);
+    school.add(door);
 
 
     // Gate
     const gate = new THREE.Group();
     const postMat = new THREE.MeshLambertMaterial({ color: 0x808080 }); // Gray
-    const postGeo = new THREE.BoxGeometry(1, 5, 1);
+    const postGeo = new THREE.BoxGeometry(1.5, 6, 1.5);
     const post1 = new THREE.Mesh(postGeo, postMat);
-    post1.position.set(-7, 2.5, 0);
+    post1.position.set(-10, 3, 0);
     gate.add(post1);
     
     const post2 = post1.clone();
-    post2.position.x = 7;
+    post2.position.x = 10;
     gate.add(post2);
 
     const gateBarMat = new THREE.MeshLambertMaterial({color: 0x555555});
-    const gateBarGeo = new THREE.BoxGeometry(6.5, 0.2, 0.2);
-    for(let i=0; i < 10; i++){
+    const gateBarGeo = new THREE.BoxGeometry(9.5, 0.3, 0.3);
+    for(let i=0; i < 12; i++){
         const barL = new THREE.Mesh(gateBarGeo, gateBarMat);
-        barL.position.set(-3.25, 0.6 + i*0.4, 0);
+        barL.position.set(-4.75, 0.6 + i*0.4, 0);
         gate.add(barL);
         const barR = barL.clone();
-        barR.position.x = 3.25;
+        barR.position.x = 4.75;
         gate.add(barR);
     }
     gate.position.z = 0.5;
@@ -724,8 +746,8 @@ export function createSchool(): THREE.Group {
     }
     const texture = new THREE.CanvasTexture(canvas);
     const signMaterial = new THREE.MeshBasicMaterial({ map: texture });
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(14, 3), signMaterial);
-    sign.position.set(0, 5.5, 0);
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(20, 4), signMaterial);
+    sign.position.set(0, 7, 0);
     gate.add(sign);
 
     school.add(gate);
@@ -749,28 +771,36 @@ export function createZebraCross(z: number): THREE.Group {
 
 export function createFlowers(): THREE.Group {
     const flowers = new THREE.Group();
-    const flowerColors = [0xff0000, 0xffff00, 0xff00ff, 0x00ffff];
+    const flowerColors = [0xff0000, 0xffff00, 0xff00ff, 0x00ffff, 0xffa500, 0x800080];
     const stemMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const stemGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.5);
 
-    for (let i = 0; i < 100; i++) {
-        const flowerBed = new THREE.Group();
-        const flowerColor = new THREE.MeshBasicMaterial({ color: flowerColors[i % 4] });
+    const createFlower = (color: number) => {
+        const flower = new THREE.Group();
+        const flowerColorMat = new THREE.MeshBasicMaterial({ color });
         const flowerGeo = new THREE.SphereGeometry(0.15, 8, 8);
         
         const stem = new THREE.Mesh(stemGeo, stemMat);
         stem.position.y = 0.25;
-        flowerBed.add(stem);
+        flower.add(stem);
 
-        const flower = new THREE.Mesh(flowerGeo, flowerColor);
-        flower.position.y = 0.5;
-        flowerBed.add(flower);
+        const head = new THREE.Mesh(flowerGeo, flowerColorMat);
+        head.position.y = 0.5;
+        flower.add(head);
+        return flower;
+    }
 
+    for (let i = 0; i < 200; i++) {
+        const flowerColor = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+        const flowerBed = createFlower(flowerColor);
+        
         const onSide = Math.random() > 0.5;
-        flowerBed.position.x = 12 + 5 + i * 1.8;
-        flowerBed.position.z = -50 + (onSide ? 5.5 : -5.5);
+        flowerBed.position.x = 12 + 5 + i * 0.9;
+        flowerBed.position.z = -50 + (onSide ? 5.5 + (Math.random()-0.5)*1 : -5.5 + (Math.random()-0.5)*1);
         
         flowers.add(flowerBed);
     }
     return flowers;
 }
+
+    

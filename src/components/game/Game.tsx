@@ -168,7 +168,7 @@ export default function Game() {
         
         bus.translateZ(moveSpeed * delta);
 
-        const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 25;
+        const SCHOOL_COMPOUND_X_MAX = 12 + 190 + 35;
         const SCHOOL_COMPOUND_X_MIN = 12;
         const SCHOOL_COMPOUND_Z_MAX = 10;
         const SCHOOL_COMPOUND_Z_MIN = -110;
@@ -225,7 +225,7 @@ export default function Game() {
           obstacleBoxes[i].setFromObject(obstacle);
           if (busBox.intersectsBox(obstacleBoxes[i])) {
               handleInfraction(obstacle.name);
-              obstacle.position.z += 20 * (obstacle.userData.direction); // Move away to prevent multiple hits
+              obstacle.position.z += 20 * (obstacle.userData.direction || 1); // Move away to prevent multiple hits
           }
         }
       });
@@ -323,5 +323,7 @@ export default function Game() {
     </div>
   );
 }
+
+    
 
     
