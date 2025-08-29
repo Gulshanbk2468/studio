@@ -244,6 +244,8 @@ function createHouses(): THREE.Group {
       // Prevent houses near the school road and its intersection
       if (xPos > 12 && zPos > -60 && zPos < -40) continue;
       if (xPos > 12 && zPos > -110 && zPos < 10) continue; // Prevent houses in school area
+      if (xPos > 20 && xPos < 12+200 && zPos >-60 && zPos < -40) continue;
+
 
       house.position.x = xPos;
       house.position.z = zPos;
@@ -335,7 +337,7 @@ export function createShops(): THREE.Group {
     for (let i = 0; i < shopNames.length; i++) {
         const shop = createShop(shopNames[i]);
         const onLeftSide = Math.random() > 0.5;
-        shop.position.x = onLeftSide ? -25 : 25;
+        shop.position.x = onLeftSide ? -20 : 20; // Move shops further from the road
         shop.position.z = -50 - i * 80 - Math.random() * 20;
         shop.rotation.y = onLeftSide ? Math.PI / 2 : -Math.PI / 2;
         shops.add(shop);
