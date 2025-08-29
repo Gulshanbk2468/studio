@@ -40,6 +40,7 @@ export default function Game() {
   const [infractionCount, setInfractionCount] = React.useState(0);
   
   const [gameState, setGameState] = React.useState<"menu" | "playing">("menu");
+  const [gameId, setGameId] = React.useState(0);
   
   const studentsRef = React.useRef<THREE.Mesh[]>([]);
   const [studentsCollected, setStudentsCollected] = React.useState(0);
@@ -101,8 +102,8 @@ export default function Game() {
     const bus = createBus();
     scene.add(bus);
     
-    bus.position.set(0, 0.5, 0);
-    bus.rotation.y = 0;
+    bus.position.set(200, 0.5, -50);
+    bus.rotation.y = -Math.PI/2;
 
     scene.add(createRoad());
     scene.add(createRoadMarkings());
@@ -157,7 +158,7 @@ export default function Game() {
       const time = clock.getElapsedTime();
 
       if (gameState === "playing") {
-        const moveDirection = (keysPressed['arrowup'] ? 1 : 0) - (keysPressed['arrowdown'] ? 1 : 0);
+        const moveDirection = (keysPressed['arrowdown'] ? 1 : 0) - (keysPressed['arrowup'] ? 1 : 0);
         if (moveDirection !== 0) {
             moveSpeed += moveDirection * acceleration * delta;
         } else {
@@ -167,11 +168,11 @@ export default function Game() {
 
 
         if(Math.abs(moveSpeed) > 0.1) {
-            const turnDirection = (keysPressed['arrowleft'] ? 1 : 0) - (keysPressed['arrowright'] ? 1 : 0);
+            const turnDirection = (keysPressed['arrowright'] ? 1 : 0) - (keysPressed['arrowleft'] ? 1 : 0);
             bus.rotation.y += turnDirection * turnSpeed * delta * Math.sign(moveSpeed);
         }
         
-        bus.translateZ(-moveSpeed * delta);
+        bus.translateZ(moveSpeed * delta);
 
         const MAIN_HIGHWAY_X_MAX = 12;
         const MAIN_HIGHWAY_X_MIN = -12;
@@ -335,9 +336,10 @@ export default function Game() {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [gameState, studentsCollected, totalStudents, toast]);
+  }, [gameId]);
 
   const startGame = () => {
+    setGameId(id => id + 1);
     setScore(0);
     setGameLog([]);
     setCoachMessage("");
@@ -386,3 +388,5 @@ export default function Game() {
     </div>
   );
 }
+
+    
