@@ -251,36 +251,7 @@ function createHouses(): THREE.Group {
       return house;
     };
 
-    // Big building with glass
-    const createGlassBuilding = () => {
-        const building = new THREE.Group();
-        const frameMat = new THREE.MeshLambertMaterial({ color: 0xACACAC });
-        const glassMat = new THREE.MeshLambertMaterial({ color: 0x6495ED, transparent: true, opacity: 0.4 });
-
-        const floors = 5;
-        const floorHeight = 4;
-
-        for (let i = 0; i < floors; i++) {
-            // Frame
-            const frame = new THREE.Mesh(new THREE.BoxGeometry(10, floorHeight, 8), frameMat);
-            frame.position.y = i * floorHeight + floorHeight/2;
-            building.add(frame);
-            // Glass panels
-            const glassWall = new THREE.Mesh(new THREE.PlaneGeometry(9, floorHeight - 0.5), glassMat);
-            glassWall.position.y = frame.position.y;
-            glassWall.position.z = 4.01;
-            building.add(glassWall);
-
-            const glassWallSide = new THREE.Mesh(new THREE.PlaneGeometry(7, floorHeight - 0.5), glassMat);
-            glassWallSide.position.y = frame.position.y;
-            glassWallSide.position.x = -5.01;
-            glassWallSide.rotation.y = Math.PI / 2;
-            building.add(glassWallSide);
-        }
-        return building;
-    }
-  
-    const houseTypes = [createOldNepaliHouse, createModernHouse, createGlassBuilding];
+    const houseTypes = [createOldNepaliHouse, createModernHouse];
 
     for (let i = 0; i < 40; i++) {
       const randomTypeIndex = Math.floor(Math.random() * houseTypes.length);
@@ -290,11 +261,13 @@ function createHouses(): THREE.Group {
       
       const zPos = -i * 12 - 20 - Math.random() * 5;
       
-      // Prevent houses near the school road and its intersection
-      const onSubRoad = house.position.x > 12 && zPos > -60 && zPos < -40;
-      if (onSubRoad) continue;
+      const xPos = onLeftSide ? -25 - Math.random() * 15 : 25 + Math.random() * 15;
 
-      house.position.x = onLeftSide ? -25 - Math.random() * 15 : 25 + Math.random() * 15;
+      // Prevent houses near the school road and its intersection
+      if (xPos > 12 && zPos > -60 && zPos < -40) continue;
+      if (xPos > 12 && zPos > -110 && zPos < 10) continue; // Prevent houses in school area
+
+      house.position.x = xPos;
       house.position.z = zPos;
       house.rotation.y = onLeftSide ? Math.PI / 2 + (Math.random()-0.5) * 0.2 : -Math.PI / 2 + (Math.random()-0.5) * 0.2;
       
@@ -327,10 +300,14 @@ export function createTrees(): THREE.Group {
       const tree = treeTypes[treeTypeIndex]();
   
       const onLeftSide = Math.random() > 0.5;
-      tree.position.x = onLeftSide ? -18 - Math.random() * 40 : 18 + Math.random() * 40;
-      tree.position.z = -i * 8 - Math.random() * 8;
+      const xPos = onLeftSide ? -18 - Math.random() * 40 : 18 + Math.random() * 40;
+      const zPos = -i * 8 - Math.random() * 8;
+      
+      tree.position.x = xPos;
+      tree.position.z = zPos;
 
       if(tree.position.x > 12 && tree.position.x < 12 + 200 && tree.position.z > -60 && tree.position.z < -40) continue; // No trees on school road
+      if(tree.position.x > 12 && tree.position.z > -110 && tree.position.z < 10) continue; // No trees in school area
       if(tree.position.x > -15 && tree.position.x < 15) continue; // Avoid trees on the main road
 
       trees.add(tree);
@@ -340,7 +317,7 @@ export function createTrees(): THREE.Group {
 
 export function createShops(): THREE.Group {
     const shops = new THREE.Group();
-    const shopNames = ['Kirana Store', 'Bakery', 'Electronics', 'Cafe', 'Pustak Pasal', 'Chatpate Center'];
+    const shopNames = ['Ambika Pustak Pasal', 'Bakery', 'Electronics', 'Cafe', 'Chatpate Center'];
   
     const createShop = (name: string) => {
         const shop = new THREE.Group();
